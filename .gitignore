@@ -1,0 +1,8 @@
+*
+
+!.gitignore
+!ccs811.py
+!drone.py
+!fluoreszenz.py
+!pops.py
+!sen55.py
