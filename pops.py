@@ -8,8 +8,16 @@ from matplotlib.colors import LogNorm
 
 class Pops:
     
+    """full documentation see https://github.com/matrup01/bac_modules \n 
+    file (str) ... Takes a POPS-produced csv-file (zB '112233.csv') \n
+    title (str,optional) ... Takes a str and uses it as a title for quickplots \n
+    start (str,optional) ... Takes a str in 'hh:mm:ss'-format and only imports data acquired after that timestamp \n
+    end (str,optional) ... Takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp \n
+    bgobj (Pops,optional) ... Takes another Pops-Object and corrects the data using the given Pops-Objects as Background \n
+    box (bool,optional) ... Takes a Boolean to determine which file is given (True ... produced by the box;False ... produced by the POPS hooked to a laptop) default-True"""
+    
     def __init__(self,file,title="Kein Titel",start="none",end="none",bgobj="none",box=True):
-        
+
         #save data
         self.title = title
         self.d_categories = [element * 1000 for element in [0.115,0.125,0.135,0.15,0.165,0.185,0.21,0.25,0.35,0.475,0.575,0.855,1.220,1.53,1.99,2.585,3.37]]
@@ -32,10 +40,13 @@ class Pops:
             
         if box:
             tempno = 43
-        else: tempno = 20
+            boardtempno = 34
+        else: 
+            tempno = 20
+            boardtempno = 11
         
-        self.ydata = [[float(data[i][j]) for i in range(1,len(data))]for j in [2,3,11,10,4,5,6,7,8,9,12,13,14,15,tempno]]
-            #ydata-Syntax: [temp_bm680,rf_bm680,temp_sen55,rf_sen55,druck,gas,pm1,pm25,pm4,pm10,voc,nox,co2,tvoc,popstemp]
+        self.ydata = [[float(data[i][j]) for i in range(1,len(data))]for j in [2,3,11,10,4,5,6,7,8,9,12,13,14,15,tempno,boardtempno]]
+            #ydata-Syntax: [temp_bm680,rf_bm680,temp_sen55,rf_sen55,druck,gas,pm1,pm25,pm4,pm10,voc,nox,co2,tvoc,popstemp,boardtemp]
         if box:
             self.pops_bins_raw = [[float(data[i][j]) for i in range(1,len(data))]for j in [56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71]]
             self.pops_bins = [[self.pops_bins_raw[j][i] / float(data[i+1][38]) for i in range(len(data)-1)] for j in range(len(self.pops_bins_raw))]
@@ -289,7 +300,7 @@ class Pops:
         
     def findplottype(self,y):
         
-        plottypes = [["temp_bm680","Temperatur (bm680)","°C"],["rf_bm680","rel. Lufteuchte (bm680)","%"],["temp_sen55","Temperatur (sen55)","°C"],["rf_sen55","rel. Lufteuchte (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"],["popstemp","popstemp","Celsius"]]
+        plottypes = [["temp_bm680","Temperatur (bm680)","°C"],["rf_bm680","rel. Lufteuchte (bm680)","%"],["temp_sen55","Temperatur (sen55)","°C"],["rf_sen55","rel. Lufteuchte (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"],["popstemp","popstemp","°C"],["boardtemp","boardtemp","°C"]]
         
         #find correct plottype
         for i in range(len(plottypes)):
