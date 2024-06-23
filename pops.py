@@ -37,24 +37,17 @@ class Pops:
         else:
             self.popstime = [dt.datetime.strptime("00:00:00","%H:%M:%S")-dt.timedelta(0,23)+dt.timedelta(0,7200)+dt.timedelta(0,float(data[i][0])) for i in range(1,len(data))]
             self.t = self.popstime
-            
-        if box:
-            tempno = 43
-            boardtempno = 34
-        else: 
-            tempno = 20
-            boardtempno = 11
         
-        self.ydata = [[float(data[i][j]) for i in range(1,len(data))]for j in [2,3,11,10,4,5,6,7,8,9,12,13,14,15,tempno,boardtempno]]
+        self.ydata = [[float(data[i][j]) for i in range(1,len(data))]for j in [2,3,11,10,4,5,6,7,8,9,12,13,14,15]]
             #ydata-Syntax: [temp_bm680,rf_bm680,temp_sen55,rf_sen55,druck,gas,pm1,pm25,pm4,pm10,voc,nox,co2,tvoc,popstemp,boardtemp]
         if box:
             self.pops_bins_raw = [[float(data[i][j]) for i in range(1,len(data))]for j in [56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71]]
             self.pops_bins = [[self.pops_bins_raw[j][i] / float(data[i+1][38]) for i in range(len(data)-1)] for j in range(len(self.pops_bins_raw))]
-            self.total = [float(data[i][28]) for i in range(1,len(data))]
+            self.ydata2 = [[float(data[i][j]) for i in range(1,len(data))] for j in [28,43,34]]
         else:
             self.pops_bins_raw = [[float(data[i][j]) for i in range(1,len(data))]for j in [33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48]]
             self.pops_bins = [[self.pops_bins_raw[j][i] / float(data[i+1][15]) for i in range(len(data)-1)] for j in range(len(self.pops_bins_raw))]
-            self.total = [float(data[i][5]) for i in range(1,len(data))]
+            self.ydata2 = [[float(data[i][j]) for i in range(1,len(data))] for j in [5,20,11]]
         
         #crop
         if start != "none":
@@ -91,7 +84,8 @@ class Pops:
             
         self.t = [self.t[i] for i in range(t_start,t_end)]
         self.popstime = [self.popstime[i] for i in range(pops_start,pops_end)]
-        self.total = [self.total[i] for i in range(pops_start,pops_end)]
+        for i in range(len(self.ydata2)):
+            self.ydata2[i] = [self.ydata2[i][j] for j in range(pops_start,pops_end)]
         for i in range(len(self.ydata)):
             self.ydata[i] = [self.ydata[i][j] for j in range(t_start,t_end)]
         for i in range(len(self.pops_bins)):
@@ -147,7 +141,7 @@ class Pops:
         self.total = [self.total[i] - bg[1] for i in range(len(self.total))]
         
         
-    def quickplot(self,y="tvoc",startcrop=0,endcrop=0):
+    def quickplot(self,y,startcrop=0,endcrop=0):
         
         #find plotdata
         plotx,ploty,label,ylabel = self.findplottype(y)
@@ -164,7 +158,7 @@ class Pops:
         plt.show()
         
         
-    def plot(self,ax,y="tvoc",startcrop=0,endcrop=0,quakes=[],quakeslabel="kein Label",quakecolor="tab:pink",color="tab:blue",togglexticks=True,printstats=False):
+    def plot(self,ax,y,startcrop=0,endcrop=0,quakes=[],quakeslabel="kein Label",quakecolor="tab:pink",color="tab:blue",togglexticks=True,printstats=False,secondary=False):
         
         #find plotdata
         plotx,ploty,label,ylabel = self.findplottype(y)
@@ -176,7 +170,12 @@ class Pops:
         ax.set_ylabel(label + " in " + ylabel)
         ax.axes.xaxis.set_visible(togglexticks)
         ax.axes.yaxis.label.set_color(color)
-        #ax.axes.yaxis.spines.set_color(color)
+        ax.tick_params(axis='y', colors=color)
+        if not secondary:
+            ax.spines["left"].set_color(color)
+        else:
+            ax.spines["right"].set_color(color)
+            ax.spines["left"].set_alpha(0)
         if len(quakes) != 0:
             ax.vlines(x=[dt.datetime.strptime(element, "%H:%M:%S")for element in quakes],ymin=min(ploty),ymax=max(ploty),color=quakecolor,ls="dashed",label=quakeslabel)
         
@@ -300,7 +299,7 @@ class Pops:
         
     def findplottype(self,y):
         
-        plottypes = [["temp_bm680","Temperatur (bm680)","°C"],["rf_bm680","rel. Lufteuchte (bm680)","%"],["temp_sen55","Temperatur (sen55)","°C"],["rf_sen55","rel. Lufteuchte (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"],["popstemp","popstemp","°C"],["boardtemp","boardtemp","°C"]]
+        plottypes = [["temp_bm680","Temperatur (bm680)","°C"],["rf_bm680","rel. Lufteuchte (bm680)","%"],["temp_sen55","Temperatur (sen55)","°C"],["rf_sen55","rel. Lufteuchte (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"]]
         
         #find correct plottype
         for i in range(len(plottypes)):
@@ -312,13 +311,16 @@ class Pops:
                 
                 return plotx,ploty,label,ylabel
             
-        if y == "total":
-            plotx = self.popstime
-            ploty = self.total
-            label = "sum of all bins"
-            ylabel = r"Counts/$cm^3$"
+        plottypes2 = [["total","sum of all bins",r"Counts/$cm^3$"],["popstemp","temperature inside POPS-box","°C"],["boardtemp","boardtemp","°C"]]
+        
+        for i in range(len(plottypes2)):
+            if y == plottypes2[i][0]:
+                plotx = self.popstime
+                ploty = self.ydata2[i]
+                label = plottypes2[i][1]
+                ylabel = plottypes2[i][2]
             
-            return plotx,ploty,label,ylabel
+                return plotx,ploty,label,ylabel
             
         for i in range(16):
             if "".join([char for char in y if char.isdigit()]) == str(i):

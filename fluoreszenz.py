@@ -84,7 +84,7 @@ class FData:
             self.channels[i] = [self.channels[i][j]-bg for j in range(len(self.channels[i]))]
             
             
-    def quickplot(self,channelno=12,startcrop=0,endcrop=0):
+    def quickplot(self,channelno,startcrop=0,endcrop=0):
         
         channelname = "ch" + str(channelno)
         channelno -= 1
