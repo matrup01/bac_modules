@@ -39,7 +39,8 @@ class Pops:
             self.t = self.popstime
         
         self.ydata = [[float(data[i][j]) for i in range(1,len(data))]for j in [2,3,11,10,4,5,6,7,8,9,12,13,14,15]]
-            #ydata-Syntax: [temp_bm680,rf_bm680,temp_sen55,rf_sen55,druck,gas,pm1,pm25,pm4,pm10,voc,nox,co2,tvoc,popstemp,boardtemp]
+            #ydata-Syntax: [temp_bm680,rf_bm680,temp_sen55,rf_sen55,druck,gas,pm1,pm25,pm4,pm10,voc,nox,co2,tvoc]
+            #ydata2-Syntax: [total,popstemp,boardtemp]
         if box:
             self.pops_bins_raw = [[float(data[i][j]) for i in range(1,len(data))]for j in [56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71]]
             self.pops_bins = [[self.pops_bins_raw[j][i] / float(data[i+1][38]) for i in range(len(data)-1)] for j in range(len(self.pops_bins_raw))]
@@ -130,7 +131,7 @@ class Pops:
         
         bins = np.array(self.pops_bins)
         bg = np.array([np.mean(element) for element in bins])
-        totalbg = np.mean(np.array(self.total))
+        totalbg = np.mean(np.array(self.ydata2[0]))
         return [bg,totalbg]
     
     
@@ -138,7 +139,7 @@ class Pops:
         
         for i in range(len(self.pops_bins)):
             self.pops_bins[i] = [self.pops_bins[i][j]-bg[0][i] for j in range(len(self.pops_bins[i]))]
-        self.total = [self.total[i] - bg[1] for i in range(len(self.total))]
+        self.ydata2[0] = [self.ydata2[0][i] - bg[1] for i in range(len(self.ydata2[0]))]
         
         
     def quickplot(self,y,startcrop=0,endcrop=0):
@@ -275,6 +276,8 @@ class Pops:
             self.ydata[i] = [self.ydata[i][j] for j in range(startcrop,length-endcrop)]
         for i in range(len(self.pops_bins)):
             self.pops_bins[i] = [self.pops_bins[i][j] for j in range(startcrop,length-endcrop)]
+        for i in range(len(self.ydata2)):
+            self.ydata2[i] = [self.ydata2[i][j] for j in range(startcrop,length-endcrop)]
         
         
         
