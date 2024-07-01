@@ -253,14 +253,14 @@
 
 	file (str) ... takes a sen55-produced csv-file
 
-5.2   plot(file,ax)
+5.2   plot(file,ax,plot)
 
 	draws a plot of a pm-value vs time on an existing matplotlib-axis
 
 	file (str) ... takes a sen55-produced csv-file
 	ax (axis) ... takes a matplotlib-axis, on which the graph will be drawn
-
-	plot (int, optional) ... determines which graph will be drawn (1-pm1, 2-pm25, 3-pm4, else-pm10), default-1
+	plot (str) ... determines which graph will be drawn (legal strings: pm1,pm25,pm4,pm10,temp,hum)
+	
 	startcrop (int, optional) ... Takes an int and crops the beginning of the plot by its amount datapoints
 	endcrop (int, optional) ... Takes an int and crops the end of the plot by its amount datapoints
 	color (str, optional) ... changes the color of the plot, default-"tab:red"

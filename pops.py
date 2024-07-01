@@ -302,7 +302,7 @@ class Pops:
         
     def findplottype(self,y):
         
-        plottypes = [["temp_bm680","Temperatur (bm680)","°C"],["rf_bm680","rel. Lufteuchte (bm680)","%"],["temp_sen55","Temperatur (sen55)","°C"],["rf_sen55","rel. Lufteuchte (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"]]
+        plottypes = [["temp_bm680","temperature (bm680)","°C"],["rf_bm680","rel. humidity (bm680)","%"],["temp_sen55","temperature (sen55)","°C"],["rf_sen55","rel. humidity (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"]]
         
         #find correct plottype
         for i in range(len(plottypes)):
