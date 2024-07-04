@@ -32,7 +32,7 @@ def quickplot(file):
     plt.show()
     
     
-def plot(file,ax,plot,startcrop=0,endcrop=0,color="tab:red"):
+def plot(file,ax,plot,startcrop=0,endcrop=0,color="tab:red",plotlabel="none"):
     
     #read data from csv to list
     data = csv.reader(open(file),delimiter=",")
@@ -64,5 +64,9 @@ def plot(file,ax,plot,startcrop=0,endcrop=0,color="tab:red"):
         print("invalid plottype, plot has to be one of the following: pm1,pm25,pm4,pm10,temp,hum")
         return
     
-    ax.plot(t,yy[0],label=yy[1],color=color)
+    if plotlabel != "none":
+        label = plotlabel
+    else: label = yy[1]
+    
+    ax.plot(t,yy[0],label=label,color=color)
     ax.set_ylabel(yy[1] + " in " + yy[2])

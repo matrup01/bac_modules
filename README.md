@@ -69,6 +69,7 @@
 	togglexticks (bool, optional) ... takes a boolean to decide if the x-ticks of ax should be visible, default-True
 	printstats (bool, optional) ... takes a boolean to decide if mean, std and var of the plot should be printed to the console, default-False
 	secondary (bool, optional) ... determines which y-axis should be colored (False-left axis/True-right axis), default-False
+	plotlabel (str, optional) ... changes label of the plot (used for legend) into the given string. If none is given, it uses one fitting the given y
 
 1.8   Pops.quickheatmap()
 
@@ -222,6 +223,7 @@
 	startcrop (int, optional) ... Takes an int and crops the beginning of the plot by its amount datapoints
 	endcrop (int, optional) ... Takes an int and crops the end of the plot by its amount datapoints
 	color (str, optional) ... changes the color of the plot, default-"tab:red"
+	plotlabel (str, optional) ... changes label of the plot (used for legend) into the given string. If none is given, it uses one fitting the given y
 
 
 4.    drone.py

@@ -159,15 +159,20 @@ class Pops:
         plt.show()
         
         
-    def plot(self,ax,y,startcrop=0,endcrop=0,quakes=[],quakeslabel="kein Label",quakecolor="tab:pink",color="tab:blue",togglexticks=True,printstats=False,secondary=False):
+    def plot(self,ax,y,startcrop=0,endcrop=0,quakes=[],quakeslabel="kein Label",quakecolor="tab:pink",color="tab:blue",togglexticks=True,printstats=False,secondary=False,plotlabel="none"):
         
         #find plotdata
         plotx,ploty,label,ylabel = self.findplottype(y)
         plotx = [plotx[i] for i in range(startcrop,len(plotx)-endcrop)]
         ploty = [ploty[i] for i in range(startcrop,len(ploty)-endcrop)]
         
+        #change label
+        if plotlabel != "none":
+            legendlabel = plotlabel
+        else: legendlabel = label
+        
         #draw plot
-        ax.plot(plotx,ploty,label=label,color=color)
+        ax.plot(plotx,ploty,label=legendlabel,color=color)
         ax.set_ylabel(label + " in " + ylabel)
         ax.axes.xaxis.set_visible(togglexticks)
         ax.axes.yaxis.label.set_color(color)

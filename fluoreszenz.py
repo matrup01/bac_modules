@@ -26,7 +26,6 @@ class FData:
         self.t = [dt.datetime.strptime(data[i][1],"%H:%M:%S.%f") for i in range(1+skiprows,len(data))]
         self.channels = [[int(data[i][j])-1000 for i in range(1+skiprows,len(data))] for j in range(2,18)]
         
-        print(str(self.t[17])[11:19])
         #crop
         t_start = 0
         t_end = len(self.t)
