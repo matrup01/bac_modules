@@ -237,12 +237,20 @@
 
 4.2   Dronedata.plot(ax)
 
-	draws a plot of height vs time on an existing matplotlib-axis
+	draws a plot of data vs time on an existing matplotlib-axis
 
 	ax (axis) ... takes a matplotlib-axis, on which the graph will be drawn
-
+	
+	plot (str) ... decides which data should be drawn (height,lat,long), default - height
 	color (str, optional) ... changes the color of the plot, default-"tab:purple"
 	secondary (bool, optional) ... determines which y-axis should be colored (False-left axis/True-right axis), default-False
+	
+4.3   Dronedata.flightmap()
+	
+	opens your flight in openstreetmap in the browser with colors indicating height
+	
+	zoomstart (int, optional) ... changes the zoomlevel of the map (can be further changed manually once the map is opened), default-21 
+	colors (list of strings, optional) ... changes the colors for the height colormap, default-("brown","blue","white")
 
 
 5.    sen55.py
