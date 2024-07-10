@@ -129,7 +129,7 @@
 
 	y (str) ... takes a string to determine which y should be plotted 
 
-	Accepted strings: temp_bme680, rf_bme680, temp_sen55, rf_sen55, druck, gas, pm1, pm25, pm4, pm10, voc, nox, co2, tvoc, popstemp, boardtemp, total, every other str containing one of the numbers 0-15 will be interpreted as a bin
+	Accepted strings: temp_bme680, hum_bme680, temp_sen55, hum_sen55, druck, gas, pm1, pm25, pm4, pm10, voc, nox, co2, tvoc, popstemp, boardtemp, total, every other str containing one of the numbers 0-15 will be interpreted as a bin
 
 1.17  Pops.replacezeros(data)
 
@@ -137,6 +137,12 @@
 	is used to avoid blank spots in the heatmap, apart from that no reasonable usecase
 
 	data (nested list of floats) ... input data array
+	
+1.18  Pops.append(obj)
+	
+	takes another Pops-Object and appends its data to the first one to create one object that contains all data
+	
+	obj (Pops-obj) ... takes a Pops object whichs data should be appended
 
 
 2.    fluoreszenz.py

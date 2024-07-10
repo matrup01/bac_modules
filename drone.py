@@ -34,7 +34,7 @@ class Dronedata:
             ax.spines["left"].set_alpha(0)
             
             
-    def flightmap(self,zoomstart=21,colors=["brown","blue","white"]):
+    def flightmap(self,zoomstart=21,colors=["brown","white","blue"]):
         
         #im = ax.scatter(x=self.data[1],y=self.data[2],c=self.data[0],cmap="terrain")
         #plt.colorbar(im,ax=ax,label="Drone height",orientation="horizontal",location="top")
