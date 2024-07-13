@@ -87,6 +87,7 @@
 	togglexticks (bool, optional) ... takes a boolean to decide if the x-ticks of ax should be visible, default-True
 	orientation (str, optional) ... takes a str to change the orientation of the colorbar, default-"horizontal"
 	location (str, optional) ... takes a str to change the location of the colorbar relative to the plot, default-"top"
+	togglecbar (bool, optional) ... takes a bool to determine if the cbar should be drawn, default-True
 	
 1.10  Pops.dndlogdp(ax)
 
@@ -140,7 +141,13 @@
 	
 1.18  Pops.append(obj)
 	
-	takes another Pops-Object and appends its data to the first one to create one object that contains all data
+	takes another Pops-Object and appends its data to the first one to create one object that contains all data (doesnt yet work with Pops.heatmap; however plotting heatmaps of different Pops-Objects on the same axis should work)
+	
+	obj (Pops-obj) ... takes a Pops object whichs data should be appended
+	
+1.19  Pops.add(obj)	
+	
+	takes another Pops-Object and returns a new Pops-Object containing data of both objects without changing them (doesnt yet work with Pops.heatmap; however plotting heatmaps of different Pops-Objects on the same axis should work)
 	
 	obj (Pops-obj) ... takes a Pops object whichs data should be appended
 
@@ -247,7 +254,7 @@
 
 	ax (axis) ... takes a matplotlib-axis, on which the graph will be drawn
 	
-	plot (str) ... decides which data should be drawn (height,lat,long), default - height
+	plot (str) ... decides which data should be drawn (height,lat,long,ws), default - height
 	color (str, optional) ... changes the color of the plot, default-"tab:purple"
 	secondary (bool, optional) ... determines which y-axis should be colored (False-left axis/True-right axis), default-False
 	
@@ -257,6 +264,12 @@
 	
 	zoomstart (int, optional) ... changes the zoomlevel of the map (can be further changed manually once the map is opened), default-21 
 	colors (list of strings, optional) ... changes the colors for the height colormap, default-("brown","blue","white")
+	
+4.4   Dronedata.append()	
+	
+	takes another Dronedata-Object and appends its data to the first one to create one object that contains all data
+	
+	obj (Dronedata-obj) ... takes a Dronedata-Object whichs data should be appended
 
 
 5.    sen55.py

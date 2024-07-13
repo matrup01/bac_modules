@@ -13,11 +13,18 @@ class Dronedata:
         data = list(data)
         
         self.t = [dt.datetime.strptime(data[i][1].replace(",","."),"%I:%M:%S.%f %p") for i in range(1,len(data))]
-        #data: [height,long,lat]
+        #data: [height,long,lat,ws]
         self.data = [[float(data[i][6].replace(",",".")) for i in range(1,len(data))],
                      [float(data[i][5].replace(",",".")) for i in range(1,len(data))],
-                     [float(data[i][4].replace(",",".")) for i in range(1,len(data))]]
+                     [float(data[i][4].replace(",",".")) for i in range(1,len(data))],
+                     [data[i][192].replace(",",".") for i in range(1,len(data))]]
         
+        #correct empty parts in ws-data:
+        
+        for i in range(len(self.data[3])):
+            if self.data[3][i] == "":
+                self.data[3][i] = "0"
+        self.data[3] = [float(self.data[3][i]) for i in range(len(self.data[3]))]
         
     def plot(self,ax,plot="height",color="tab:purple",secondary=False):
         
@@ -55,7 +62,7 @@ class Dronedata:
         
     def findplottype(self,y):
         
-        plottypes = [["height","Drone height","height in m"],["long","Drone longitude","Drone longitude"],["lat","Drone latitude","Drone latitude"]]
+        plottypes = [["height","Drone height","height AGL in m"],["long","Drone longitude","Drone longitude"],["lat","Drone latitude","Drone latitude"],["ws","wind speed","wind speed in km/h"]]
         
         #find correct plottype
         for i in range(len(plottypes)):
@@ -66,4 +73,13 @@ class Dronedata:
                 ylabel = plottypes[i][2]
                 
                 return plotx,ploty,label,ylabel
+            
+    def append(self,obj):
+        
+        for i in obj.t:
+            self.t.append(i)
+            
+        for i in range(len(self.data)):
+            for j in obj.data[i]:
+                self.data[i].append(j)
             

@@ -5,6 +5,7 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.colors import LogNorm
+from copy import copy
 
 class Pops:
     
@@ -19,6 +20,7 @@ class Pops:
     def __init__(self,file,title="Kein Titel",start="none",end="none",bgobj="none",box=True):
 
         #save data
+        self.filename = file
         self.title = title
         self.d_categories = [element * 1000 for element in [0.115,0.125,0.135,0.15,0.165,0.185,0.21,0.25,0.35,0.475,0.575,0.855,1.220,1.53,1.99,2.585,3.37]]
         
@@ -210,20 +212,27 @@ class Pops:
         plt.show()
         
         
-    def heatmap(self,ax,startcrop=0,endcrop=0,togglexticks=True,orientation="horizontal",location="top"):
+    def heatmap(self,ax,startcrop=0,endcrop=0,togglexticks=True,orientation="horizontal",location="top",togglecbar=True):
         
         #convert to heatmapdata
         heatmapdata = [[self.pops_bins[j][i] / (math.log10(self.d_categories[j+1])-math.log10(self.d_categories[j])) for i in range(len(self.pops_bins[0])-1)] for j in range(len(self.pops_bins))]
         heatmapdata = self.replacezeros(heatmapdata)
         xx,yy = np.meshgrid(self.popstime,self.d_categories)
         
+        mask = np.array([[xx[i][j] for j in range(len(xx[i])-1)] for i in range(len(xx)-1)])
+        
+        heatmapdata = np.ma.masked_array(heatmapdata,mask<min(self.popstime))
+        heatmapdata = np.ma.masked_array(heatmapdata,mask>max(self.popstime))
+        
         #draw plot
-        im = ax.pcolormesh(xx,yy,heatmapdata,cmap="RdYlBu_r",norm=LogNorm())
+        im = ax.pcolormesh(xx,yy,heatmapdata,cmap="RdYlBu_r",norm=LogNorm(vmin=1,vmax=10000))
         ax.set_yscale("log")
         ax.set_ylabel("Durchmesser in nm")
         ax.axes.xaxis.set_visible(togglexticks)
-        plt.colorbar(im,ax=ax,label="dN/dlogdp",orientation=orientation,location=location)
+        if togglecbar:
+            plt.colorbar(im,ax=ax,label="dN/dlogdp",orientation=orientation,location=location)
         
+        #return xx,yy,heatmapdata
         
     def dndlogdp(self,ax):
         
@@ -320,6 +329,32 @@ class Pops:
         for i in range(len(self.ydata2)):
             for j in obj.ydata2[i]:
                 self.ydata2[i].append(j)
+                
+                
+    def add(self,obj):
+                    
+        newpops = Pops(file=self.filename)
+        newpops.t = copy(self.t)
+        newpops.popstime = copy(self.popstime)
+        newpops.ydata = copy(self.ydata)
+        newpops.ydata2 = copy(self.ydata2)
+        
+        for i in obj.popstime:
+            newpops.popstime.append(i)
+            
+        for i in obj.t:
+            newpops.t.append(i)
+            
+        for i in range(len(newpops.ydata)):
+            for j in obj.ydata[i]:
+                newpops.ydata[i].append(j)
+                
+        for i in range(len(newpops.ydata2)):
+            for j in obj.ydata2[i]:
+                newpops.ydata2[i].append(j)
+                
+        return newpops
+                
         
         
     def findplottype(self,y):
