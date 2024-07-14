@@ -6,8 +6,95 @@ import matplotlib.pyplot as plt
 import tikzplotlib
 
 
+class SEN55:
+    
+    def __init__(self,file,start="none",end="none",title="no title"):
+        
+        #init
+        self.title = title
+        
+        #read data from csv to list
+        data = csv.reader(open(file),delimiter=",")
+        data = list(data)
+        
+        
+        #extract x and y values from list
+        self.t = [dt.datetime.strptime(data[i][1],"%H:%M:%S") for i in range(1,len(data)-2)]
+        
+        self.finder = {
+            "pm1" : 0,
+            "pm25" : 1,
+            "pm4" : 2,
+            "pm10" : 3,
+            "temp" : 4,
+            "hum" : 5}
+        
+        self.y = [[[float(data[i][6]) for i in range(1,len(data)-2)],"PM1",r'$\mu$g/$m^3$'],
+             [[float(data[i][7]) for i in range(1,len(data)-2)],"PM2,5","$\mu$g/$m^3$"],
+             [[float(data[i][8]) for i in range(1,len(data)-2)],"PM4","$\mu$g/$m^3$"],
+             [[float(data[i][9]) for i in range(1,len(data)-2)],"PM10","$\mu$g/$m^3$"],
+             [[float(data[i][2]) for i in range(1,len(data)-2)],"temperature","°C"],
+             [[float(data[i][3]) for i in range(1,len(data)-2)],"humidity","%"]]
+        
+        
+        #crop
+        if start != "none":
+            indices = []
+            for i in range(len(self.t)):
+                if dt.datetime.strptime(start,"%H:%M:%S") <= self.t[i]:
+                    indices.append(i)
+            start_i = indices[0]
+        else: start_i = 0
+        
+        if end != "none":
+            indices = []
+            for i in range(len(self.t)):
+                if dt.datetime.strptime(end,"%H:%M:%S") >= self.t[i]:
+                    indices.append(i)
+            end_i = len(indices)
+        else: end_i = len(self.t)
+        
+        self.t = [self.t[i] for i in range(start_i,end_i)]
+        for i in range(len(self.y)):
+            self.y[i] = [self.y[i][j] for j in range(start_i,end_i)]
+            
+    def findplot(self,y):
+        
+        try:
+            loc = self.finder[y]
+            yy = self.y[loc]
+        except:
+            raise ValueError("Invalid plottype: plot has to be one of the following strings: pm1,pm25,pm4,pm10,temp,hum")
+            
+        return yy
+            
+    def quickplot(self):
+        
+        fig,ax = plt.subplots()
+        plt.title(self.title)
 
-def quickplot(file):
+        ax.plot(self.t,self.y[1][0])
+        ax.set_ylabel = self.y[1][1] + " in " + self.y[1][2]
+        
+        plt.show()
+        
+    def plot(self,ax,y,color="tab:red",secondary=False):
+        
+        #get plotdata
+        yy = self.findplot(y)
+        
+        #draw plot
+        ax.plot(self.t,yy[0],color=color)
+        ax.set_ylabel = yy[1] + " in " + yy[2]
+        ax.axes.yaxis.label.set_color(color)
+        ax.tick_params(axis='y', colors=color)
+        if not secondary:
+            ax.spines["left"].set_color(color)
+        else:
+            ax.spines["right"].set_color(color)
+            ax.spines["left"].set_alpha(0)
+
+def quickplot(file): #legacy function; use SEN55-Object instead
     data = csv.reader(open(file),delimiter=",")
     data = list(data)
     
@@ -32,7 +119,7 @@ def quickplot(file):
     plt.show()
     
     
-def plot(file,ax,plot,startcrop=0,endcrop=0,color="tab:red",plotlabel="none"):
+def plot(file,ax,plot,startcrop=0,endcrop=0,color="tab:red",plotlabel="none"): #legacy function; use SEN55-Object instead
     
     #read data from csv to list
     data = csv.reader(open(file),delimiter=",")
@@ -70,3 +157,5 @@ def plot(file,ax,plot,startcrop=0,endcrop=0,color="tab:red",plotlabel="none"):
     
     ax.plot(t,yy[0],label=label,color=color)
     ax.set_ylabel(yy[1] + " in " + yy[2])
+    
+    

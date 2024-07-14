@@ -330,6 +330,10 @@ class Pops:
             for j in obj.ydata2[i]:
                 self.ydata2[i].append(j)
                 
+        for i in range(len(self.pops_bins)):
+            for j in obj.pops_bins[i]:
+                self.pops_bins[i].append(j)
+                
                 
     def add(self,obj):
                     
@@ -352,6 +356,10 @@ class Pops:
         for i in range(len(newpops.ydata2)):
             for j in obj.ydata2[i]:
                 newpops.ydata2[i].append(j)
+                
+        for i in range(len(newpops.pops_bins)):
+            for j in obj.pops_bins[i]:
+                newpops.pops_bins[i].append(j)
                 
         return newpops
                 
@@ -393,9 +401,9 @@ class Pops:
             
         output = "Unknown y: y must be one of the following strings: " + "".join([plottypes[i][0]+", " for i in range(len(plottypes))])
         output += "".join(["b"+str(i)+", " for i in range(15)])
-        print(output)
+        output += "b15"
         
-        return self.t,[42 for i in range(len(self.t))],"invalid y","invalid y"  #Platzhalter
+        raise ValueError(output)
         
         
     def replacezeros(self,data):

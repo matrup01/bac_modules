@@ -141,13 +141,13 @@
 	
 1.18  Pops.append(obj)
 	
-	takes another Pops-Object and appends its data to the first one to create one object that contains all data (doesnt yet work with Pops.heatmap; however plotting heatmaps of different Pops-Objects on the same axis should work)
+	takes another Pops-Object and appends its data to the first one to create one object that contains all data 
 	
 	obj (Pops-obj) ... takes a Pops object whichs data should be appended
 	
 1.19  Pops.add(obj)	
 	
-	takes another Pops-Object and returns a new Pops-Object containing data of both objects without changing them (doesnt yet work with Pops.heatmap; however plotting heatmaps of different Pops-Objects on the same axis should work)
+	takes another Pops-Object and returns a new Pops-Object containing data of both objects without changing them 
 	
 	obj (Pops-obj) ... takes a Pops object whichs data should be appended
 
@@ -219,24 +219,35 @@
 3.    ccs811.py
 
 
-3.1   quickplot(file)
+3.1   CCS811(file)
 
-	draws a plot of tvoc and co2 vs time
+	creates a CCS811-object
 
 	file (str) ... takes a ccs811-produced csv-file
+	
+	start (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired after that timestamp
+	end (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp
+	title (str, optional) ... takes a str and uses it as a title for quickplots
 
-3.2   plot(file,ax)
+3.2   plot(ax,y)
 
 	draws a plot of tvoc vs time or co2 vs time on an existing matplotlib-axis
 
-	file (str) ... takes a ccs811-produced csv-file
 	ax (axis) ... takes a matplotlib-axis, on which the graph will be drawn
+	y (str) ... determines which plot should be drawn (legal strings: 'tvoc','co2')
 
-	plot (int, optional) ... if it's 1 tvoc will be drawn, else co2 will be drawn, default-1
-	startcrop (int, optional) ... Takes an int and crops the beginning of the plot by its amount datapoints
-	endcrop (int, optional) ... Takes an int and crops the end of the plot by its amount datapoints
-	color (str, optional) ... changes the color of the plot, default-"tab:red"
-	plotlabel (str, optional) ... changes label of the plot (used for legend) into the given string. If none is given, it uses one fitting the given y
+	color (str, optional) ... changes the color of the plot, default-"tab:brown"
+	secondary (bool, oprional) ... determines which y-axis should be colored (False-left axis/True-right axis), default-False
+	
+3.3   quickplot()
+	
+	draws a plot of tvoc vs time
+	
+3.4   findplot(y)
+	
+	matches the given str with the correct data and returns it
+	
+	y (str) ... plottype (legal strings: 'tvoc','co2')
 
 
 4.    drone.py
@@ -275,21 +286,32 @@
 5.    sen55.py
 
 
+5.1   SEN55(file)
 
-5.1   quickplot(file)
-
-	draws a plot of pm1, pm2.5, pm4 and pm10 vs time
-
-	file (str) ... takes a sen55-produced csv-file
-
-5.2   plot(file,ax,plot)
-
-	draws a plot of a pm-value vs time on an existing matplotlib-axis
+	creates a SEN55-object
 
 	file (str) ... takes a sen55-produced csv-file
-	ax (axis) ... takes a matplotlib-axis, on which the graph will be drawn
-	plot (str) ... determines which graph will be drawn (legal strings: pm1,pm25,pm4,pm10,temp,hum)
 	
-	startcrop (int, optional) ... Takes an int and crops the beginning of the plot by its amount datapoints
-	endcrop (int, optional) ... Takes an int and crops the end of the plot by its amount datapoints
+	start (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired after that timestamp
+	end (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp
+	title (str, optional) ... takes a str and uses it as a title for quickplots
+
+5.2   plot(ax,y)
+
+	draws a plot of tvoc vs time or co2 vs time on an existing matplotlib-axis
+
+	ax (axis) ... takes a matplotlib-axis, on which the graph will be drawn
+	y (str) ... determines which plot should be drawn (legal strings: 'pm1','pm25','pm4','pm10','temp','hum')
+
 	color (str, optional) ... changes the color of the plot, default-"tab:red"
+	secondary (bool, oprional) ... determines which y-axis should be colored (False-left axis/True-right axis), default-False
+	
+3.3   quickplot()
+	
+	draws a plot of tvoc vs time
+	
+3.4   findplot(y)
+	
+	matches the given str with the correct data and returns it
+	
+	y (str) ... plottype (legal strings: 'pm1','pm25','pm4','pm10','temp','hum')
