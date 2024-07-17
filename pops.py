@@ -314,6 +314,13 @@ class Pops:
         return mean,std,var
     
     
+    def returndata(self,y):
+        
+        placeholder,data,ph2,ph3 = self.findplottype(y)
+        
+        return data
+    
+    
     def append(self,obj):
         
         for i in obj.popstime:
@@ -407,6 +414,7 @@ class Pops:
         
         
     def replacezeros(self,data):
+        
         smallest = 10000
         for element in data:
             for i in range(len(element)):
@@ -417,3 +425,47 @@ class Pops:
                 if element[i] <= 0:
                     element[i] = smallest
         return data
+    
+    
+    def average(self):
+        
+        meant,meanydata,meanpopst,meanydata2,meanpopsbins = [],[],[],[],[]
+        
+        for i in range(len(self.ydata)):
+            meanydata.append([])
+        for i in range(len(self.ydata2)):
+            meanydata2.append([])
+        for i in range(len(self.pops_bins)):
+            meanpopsbins.append([])
+            
+        for_checker = True
+            
+        for i in range(len(self.t)):
+            
+            if for_checker:
+                now = self.t[i].minute
+                minute_vals = []
+                
+            for_checker = False
+            
+            minute_vals.append(i)
+            
+            if self.t[i].minute != now:
+                
+                meant.append(self.t[minute_vals[math.ceil(len(minute_vals)/2)]])
+                meanpopst.append(self.popstime[minute_vals[math.ceil(len(minute_vals)/2)]])
+                for j in range(len(self.ydata)):
+                    meanydata[j].append(np.mean([self.ydata[j][k] for k in minute_vals]))
+                for j in range(len(self.ydata2)):
+                    meanydata2[j].append(np.mean([self.ydata2[j][k] for k in minute_vals]))
+                for j in range(len(self.pops_bins)):
+                    meanpopsbins[j].append(np.mean([self.pops_bins[j][k] for k in minute_vals]))
+                    
+                for_checker = True
+                
+        self.t = meant
+        self.popstime = meanpopst
+        self.ydata = meanydata
+        self.ydata2 = meanydata2
+        self.pops_bins = meanpopsbins
+            

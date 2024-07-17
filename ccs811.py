@@ -3,7 +3,7 @@ import matplotlib.dates as md
 import datetime as dt
 import csv
 import matplotlib.pyplot as plt
-import tikzplotlib
+import math
 
 
 class CCS811:
@@ -38,14 +38,14 @@ class CCS811:
         if end != "none":
             indices = []
             for i in range(len(self.t)):
-                if dt.datetime.strptime(end,"%H:%M:%S") >= self.t[i]:
+                if dt.datetime.strptime(end,"%H:%M:%S") <= self.t[i]:
                     indices.append(i)
-            end_i = len(indices)
-        else: end_i = len(self.t)
+            end_i = indices[0]
+        else: end_i = len(self.t)-1
         
         self.t = [self.t[i] for i in range(start_i,end_i)]
         for i in range(len(self.y)):
-            self.y[i] = [self.y[i][j] for j in range(start_i,end_i)]
+            self.y[i][0] = [self.y[i][0][j] for j in range(start_i,end_i)]
             
             
     def findplot(self,y):
@@ -85,6 +85,45 @@ class CCS811:
         else:
             ax.spines["right"].set_color(color)
             ax.spines["left"].set_alpha(0)
+            
+            
+    def returndata(self,y):
+        
+        yy = self.findplot(y)
+        
+        return yy
+    
+    
+    def average(self):
+        
+        meant,meany = [],[]
+        
+        for i in range(len(self.y)):
+            meany.append([])
+        
+        for_checker = True
+        
+        for i in range(len(self.t)):
+            
+            if for_checker:
+                now = self.t[i].minute
+                minute_vals = []
+                
+            for_checker = False
+            
+            minute_vals.append(i)
+            
+            if self.t[i].minute != now:
+                
+                meant.append(self.t[minute_vals[math.ceil(len(minute_vals)/2)]])
+                for j in range(len(self.y)):
+                    meany[j].append(np.mean([self.y[j][0][k] for k in minute_vals]))
+                    
+                for_checker = True
+                
+        self.t = meant
+        for i in range(len(self.y)):
+            self.y[i][0] = meany[i]
 
 
 def quickplot(file): #legacy function; use CCS811-Object instead

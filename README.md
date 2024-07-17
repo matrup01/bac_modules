@@ -150,6 +150,10 @@
 	takes another Pops-Object and returns a new Pops-Object containing data of both objects without changing them 
 	
 	obj (Pops-obj) ... takes a Pops object whichs data should be appended
+	
+1.20  Pops.average()
+	
+	averages all the data minutewise
 
 
 2.    fluoreszenz.py
