@@ -12,6 +12,7 @@
 	end (str,optional) ... Takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp
 	bgobj (Pops,optional) ... Takes another Pops-Object and corrects the data using the given Pops-Objects as Background
 	box (bool,optional) ... Takes a Boolean to determine which file is given (True ... produced by the box;False ... produced by the POPS hooked to a laptop) default-True
+   timecorr (int,optional) ... Takes an int and corrects popstime by it, default-23
 
 1.2   Pops.internalbg(startmeasurementtime)
 
@@ -85,7 +86,7 @@
 	startcrop (int, optional) ... Takes an int and crops the beginning of the plot by its amount seconds
 	endcrop (int, optional) ... Takes an int and crops the end of the plot by its amount seconds
 	togglexticks (bool, optional) ... takes a boolean to decide if the x-ticks of ax should be visible, default-True
-	orientation (str, optional) ... takes a str to change the orientation of the colorbar, default-"horizontal"
+	pad (float, optional) ... takes a float to change the distance between plot and cmap, default-5.2
 	location (str, optional) ... takes a str to change the location of the colorbar relative to the plot, default-"top"
 	togglecbar (bool, optional) ... takes a bool to determine if the cbar should be drawn, default-True
 	
@@ -154,6 +155,10 @@
 1.20  Pops.average()
 	
 	averages all the data minutewise
+
+1.21  Pops.returndata(y)
+
+   returns a list of the data y
 
 
 2.    fluoreszenz.py
@@ -233,7 +238,7 @@
 	end (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp
 	title (str, optional) ... takes a str and uses it as a title for quickplots
 
-3.2   plot(ax,y)
+3.2   CCS811.plot(ax,y)
 
 	draws a plot of tvoc vs time or co2 vs time on an existing matplotlib-axis
 
@@ -243,15 +248,23 @@
 	color (str, optional) ... changes the color of the plot, default-"tab:brown"
 	secondary (bool, oprional) ... determines which y-axis should be colored (False-left axis/True-right axis), default-False
 	
-3.3   quickplot()
+3.3   CCS811.quickplot()
 	
 	draws a plot of tvoc vs time
 	
-3.4   findplot(y)
+3.4   CCS811.findplot(y)
 	
 	matches the given str with the correct data and returns it
 	
 	y (str) ... plottype (legal strings: 'tvoc','co2')
+	
+3.5   CCS811.average()
+	
+	averages all the data minutewise
+
+3.6   CCS811.returndata(y)
+
+   returns a list of the data y
 
 
 4.    drone.py
@@ -300,7 +313,7 @@
 	end (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp
 	title (str, optional) ... takes a str and uses it as a title for quickplots
 
-5.2   plot(ax,y)
+5.2   SEN55.plot(ax,y)
 
 	draws a plot of tvoc vs time or co2 vs time on an existing matplotlib-axis
 
@@ -310,12 +323,20 @@
 	color (str, optional) ... changes the color of the plot, default-"tab:red"
 	secondary (bool, oprional) ... determines which y-axis should be colored (False-left axis/True-right axis), default-False
 	
-3.3   quickplot()
+3.3   SEN55.quickplot()
 	
 	draws a plot of tvoc vs time
 	
-3.4   findplot(y)
+3.4   SEN55.findplot(y)
 	
 	matches the given str with the correct data and returns it
 	
 	y (str) ... plottype (legal strings: 'pm1','pm25','pm4','pm10','temp','hum')
+	
+3.5   SEN55.average()
+	
+	averages all the data minutewise
+
+3.6   SEN55.returndata(y)
+
+   returns a list of the data y

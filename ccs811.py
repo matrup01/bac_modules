@@ -65,7 +65,8 @@ class CCS811:
         plt.title(self.title)
 
         ax.plot(self.t,self.y[0][0])
-        ax.set_ylabel = self.y[0][1] + " in " + self.y[0][2]
+        ax.set_ylabel(self.y[0][1] + " in " + self.y[0][2])
+        ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
         
         plt.show()
         
@@ -77,9 +78,10 @@ class CCS811:
         
         #draw plot
         ax.plot(self.t,yy[0],color=color)
-        ax.set_ylabel = yy[1] + " in " + yy[2]
+        ax.set_ylabel(yy[1] + " in " + yy[2])
         ax.axes.yaxis.label.set_color(color)
         ax.tick_params(axis='y', colors=color)
+        ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
         if not secondary:
             ax.spines["left"].set_color(color)
         else:
@@ -89,7 +91,7 @@ class CCS811:
             
     def returndata(self,y):
         
-        yy = self.findplot(y)
+        yy = self.findplot(y)[0]
         
         return yy
     

@@ -5,6 +5,7 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.colors import LogNorm
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from copy import copy
 
 class Pops:
@@ -17,12 +18,15 @@ class Pops:
     bgobj (Pops,optional) ... Takes another Pops-Object and corrects the data using the given Pops-Objects as Background \n
     box (bool,optional) ... Takes a Boolean to determine which file is given (True ... produced by the box;False ... produced by the POPS hooked to a laptop) default-True"""
     
-    def __init__(self,file,title="Kein Titel",start="none",end="none",bgobj="none",box=True):
+    def __init__(self,file,title="Kein Titel",start="none",end="none",bgobj="none",box=True,timecorr=23):
 
-        #save data
+        #init vars
         self.filename = file
         self.title = title
+        self.relative = False
         self.d_categories = [element * 1000 for element in [0.115,0.125,0.135,0.15,0.165,0.185,0.21,0.25,0.35,0.475,0.575,0.855,1.220,1.53,1.99,2.585,3.37]]
+        self.plottypes = [["temp_bm680","temperature (bm680)","°C"],["hum_bm680","rel. humidity (bm680)","%"],["temp_sen55","temperature (sen55)","°C"],["hum_sen55","rel. humidity (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"]]
+        self.plottypes2 = [["total","sum of all bins",r"Counts/$cm^3$"],["popstemp","temperature inside POPS-box","°C"],["boardtemp","boardtemp","°C"],["pops_pm25","PM2.5 from POPS",r"Counts/$cm^3$"],["pops_underpm25","particles smaller than sen55-pm25",r"Counts/$cm^3$"]]
         
         #reads data from csv to list
         data = csv.reader(open(file),delimiter=",")
@@ -34,15 +38,15 @@ class Pops:
         
         #extract x and y values from list
         if box:
-            self.popstime = [dt.datetime.strptime("00:00:00","%H:%M:%S")-dt.timedelta(0,23)+dt.timedelta(0,7200)+dt.timedelta(0,float(data[i][23])) for i in range(1,len(data))]
+            self.popstime = [dt.datetime.strptime("00:00:00","%H:%M:%S")-dt.timedelta(0,timecorr)+dt.timedelta(0,7200)+dt.timedelta(0,float(data[i][23])) for i in range(1,len(data))]
             self.t = [dt.datetime.strptime(data[i][1],"%H:%M:%S") for i in range(1,len(data))]
         else:
-            self.popstime = [dt.datetime.strptime("00:00:00","%H:%M:%S")-dt.timedelta(0,23)+dt.timedelta(0,7200)+dt.timedelta(0,float(data[i][0])) for i in range(1,len(data))]
+            self.popstime = [dt.datetime.strptime("00:00:00","%H:%M:%S")-dt.timedelta(0,timecorr)+dt.timedelta(0,7200)+dt.timedelta(0,float(data[i][0])) for i in range(1,len(data))]
             self.t = self.popstime
         
         self.ydata = [[float(data[i][j]) for i in range(1,len(data))]for j in [2,3,11,10,4,5,6,7,8,9,12,13,14,15]]
             #ydata-Syntax: [temp_bm680,rf_bm680,temp_sen55,rf_sen55,druck,gas,pm1,pm25,pm4,pm10,voc,nox,co2,tvoc]
-            #ydata2-Syntax: [total,popstemp,boardtemp]
+            #ydata2-Syntax: [total,popstemp,boardtemp,pops_pm25,pops_underpm25]
         if box:
             self.pops_bins_raw = [[float(data[i][j]) for i in range(1,len(data))]for j in [56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71]]
             self.pops_bins = [[self.pops_bins_raw[j][i] / float(data[i+1][38]) for i in range(len(data)-1)] for j in range(len(self.pops_bins_raw))]
@@ -51,6 +55,9 @@ class Pops:
             self.pops_bins_raw = [[float(data[i][j]) for i in range(1,len(data))]for j in [33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48]]
             self.pops_bins = [[self.pops_bins_raw[j][i] / float(data[i+1][15]) for i in range(len(data)-1)] for j in range(len(self.pops_bins_raw))]
             self.ydata2 = [[float(data[i][j]) for i in range(1,len(data))] for j in [5,20,11]]
+        #extract pm25 from pops
+        self.ydata2.append([np.sum([self.pops_bins[i][j] for i in range(8,15)]) for j in range(len(self.pops_bins[0]))])
+        self.ydata2.append([np.sum([self.pops_bins[i][j] for i in range(8)]) for j in range(len(self.pops_bins[0]))])
         
         #crop
         if start != "none":
@@ -212,7 +219,7 @@ class Pops:
         plt.show()
         
         
-    def heatmap(self,ax,startcrop=0,endcrop=0,togglexticks=True,orientation="horizontal",location="top",togglecbar=True):
+    def heatmap(self,ax,startcrop=0,endcrop=0,togglexticks=True,pad=5.2,location="top",togglecbar=True):
         
         #convert to heatmapdata
         heatmapdata = [[self.pops_bins[j][i] / (math.log10(self.d_categories[j+1])-math.log10(self.d_categories[j])) for i in range(len(self.pops_bins[0])-1)] for j in range(len(self.pops_bins))]
@@ -230,9 +237,23 @@ class Pops:
         ax.set_ylabel("Durchmesser in nm")
         ax.axes.xaxis.set_visible(togglexticks)
         if togglecbar:
-            plt.colorbar(im,ax=ax,label="dN/dlogdp",orientation=orientation,location=location)
+            if location == "top":
+                axins = inset_axes(ax,
+                        width="100%",  
+                        height="8%",
+                        loc='upper center',
+                        borderpad=-5
+                       )
+                plt.colorbar(im,cax=axins,label="dN/dlogdp",orientation="horizontal",pad=pad)
+            else: 
+                axins = inset_axes(ax,
+                        width="100%",  
+                        height="8%",
+                        loc='lower center',
+                        borderpad=-5
+                       )
+                plt.colorbar(im,cax=axins,label="dN/dlogdp",orientation="horizontal",pad=pad)
         
-        #return xx,yy,heatmapdata
         
     def dndlogdp(self,ax):
         
@@ -369,31 +390,57 @@ class Pops:
                 newpops.pops_bins[i].append(j)
                 
         return newpops
-                
+    
+    
+    def relativevals(self,bgobj):
+
+        bgydata = [bgobj.returnstats(bgobj.plottypes[i][0])[0] for i in range(len(bgobj.plottypes))]            
+        bgydata2 = [bgobj.returnstats(bgobj.plottypes2[i][0])[0] for i in range(len(bgobj.plottypes2))]
+        bgpops_bins = [bgobj.returnstats(str(i))[0] for i in range(len(bgobj.pops_bins))]
+        
+        for j in range(len(self.ydata)):
+            newdata = []
+            for i in range(len(self.ydata[j])):
+                newdata.append(((self.ydata[j][i] / bgydata[j])-1)*100)
+            self.ydata[j] = copy(newdata)
+            
+        for j in range(len(self.ydata2)):
+            newdata = []
+            for i in range(len(self.ydata2[j])):
+                newdata.append(((self.ydata2[j][i] / bgydata2[j])-1)*100)
+            self.ydata2[j] = copy(newdata)
+            
+        for j in range(len(self.pops_bins)):
+            newdata = []
+            for i in range(len(self.pops_bins[j])):
+                newdata.append(((self.pops_bins[j][i] / bgpops_bins[j])-1)*100)
+            self.pops_bins[j] = copy(newdata)
+            
+        self.relative = True
         
         
     def findplottype(self,y):
         
-        plottypes = [["temp_bm680","temperature (bm680)","°C"],["hum_bm680","rel. humidity (bm680)","%"],["temp_sen55","temperature (sen55)","°C"],["hum_sen55","rel. humidity (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"]]
+        
         
         #find correct plottype
-        for i in range(len(plottypes)):
-            if plottypes[i][0] == y:
+        for i in range(len(self.plottypes)):
+            if self.plottypes[i][0] == y:
                 plotx = self.t
                 ploty = self.ydata[i]
-                label = plottypes[i][1]
-                ylabel = plottypes[i][2]
+                label = self.plottypes[i][1]
+                ylabel = self.plottypes[i][2] if not self.relative else "% of background"
                 
                 return plotx,ploty,label,ylabel
             
-        plottypes2 = [["total","sum of all bins",r"Counts/$cm^3$"],["popstemp","temperature inside POPS-box","°C"],["boardtemp","boardtemp","°C"]]
         
-        for i in range(len(plottypes2)):
-            if y == plottypes2[i][0]:
+        
+        for i in range(len(self.plottypes2)):
+            if y == self.plottypes2[i][0]:
                 plotx = self.popstime
                 ploty = self.ydata2[i]
-                label = plottypes2[i][1]
-                ylabel = plottypes2[i][2]
+                label = self.plottypes2[i][1]
+                ylabel = self.plottypes2[i][2] if not self.relative else "% of background"
             
                 return plotx,ploty,label,ylabel
             
@@ -402,11 +449,11 @@ class Pops:
                 plotx = self.popstime
                 ploty = self.pops_bins[i]
                 label = "b" + str(i)
-                ylabel = r"Counts/$cm^3$"
+                ylabel = r"Counts/$cm^3$" if not self.relative else "% of background"
                 
                 return plotx,ploty,label,ylabel
             
-        output = "Unknown y: y must be one of the following strings: " + "".join([plottypes[i][0]+", " for i in range(len(plottypes))])
+        output = "Unknown y: y must be one of the following strings: " + "".join([self.plottypes[i][0]+", " for i in range(len(self.plottypes))])
         output += "".join(["b"+str(i)+", " for i in range(15)])
         output += "b15"
         
@@ -423,7 +470,7 @@ class Pops:
         for element in data:
             for i in range(len(element)):
                 if element[i] <= 0:
-                    element[i] = smallest
+                    element[i] = np.nan
         return data
     
     
