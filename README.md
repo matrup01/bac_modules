@@ -13,6 +13,7 @@
 	bgobj (Pops,optional) ... Takes another Pops-Object and corrects the data using the given Pops-Objects as Background
 	box (bool,optional) ... Takes a Boolean to determine which file is given (True ... produced by the box;False ... produced by the POPS hooked to a laptop) default-True
    timecorr (int,optional) ... Takes an int and corrects popstime by it, default-23
+   relobj(Pops,optional) ... Takes a Pops object and displays all data as relative to the mean of it (see 1.22)
 
 1.2   Pops.internalbg(startmeasurementtime)
 
@@ -158,7 +159,13 @@
 
 1.21  Pops.returndata(y)
 
-   returns a list of the data y
+	returns a list of the data y
+	
+1.22  Pops.relativevals(bgobj)
+
+	changes all data to relative to the mean of the bgobj
+	
+	bgobj (Pops-obj) ... takes a Pops object to whichs mean data should be relative to
 
 
 2.    fluoreszenz.py
@@ -264,7 +271,7 @@
 
 3.6   CCS811.returndata(y)
 
-   returns a list of the data y
+	returns a list of the data y
 
 
 4.    drone.py
@@ -321,22 +328,37 @@
 	y (str) ... determines which plot should be drawn (legal strings: 'pm1','pm25','pm4','pm10','temp','hum')
 
 	color (str, optional) ... changes the color of the plot, default-"tab:red"
-	secondary (bool, oprional) ... determines which y-axis should be colored (False-left axis/True-right axis), default-False
+	secondary (bool, optional) ... determines which y-axis should be colored (False-left axis/True-right axis), default-False
 	
-3.3   SEN55.quickplot()
+5.3   SEN55.quickplot()
 	
 	draws a plot of tvoc vs time
 	
-3.4   SEN55.findplot(y)
+5.4   SEN55.findplot(y)
 	
 	matches the given str with the correct data and returns it
 	
 	y (str) ... plottype (legal strings: 'pm1','pm25','pm4','pm10','temp','hum')
 	
-3.5   SEN55.average()
+5.5   SEN55.average()
 	
 	averages all the data minutewise
 
-3.6   SEN55.returndata(y)
+5.6   SEN55.returndata(y)
 
-   returns a list of the data y
+	returns a list of the data y
+	
+	
+6.    getdata.py
+
+6.1   getdata(day,height,loc,pops,sen55,ccs811,file)
+
+	returns a dictionary containing lists of data-objects (Pops,SEN55,CCS811) of all flights that meet certain criteria (day,height,loc) which are specified on a lookuptable
+	
+	day (list of str) ... only flights on days in this list are returned (if no day is given, flights from all days are returned) - legal strings: "1106","1206","1306","1406","0807","0907","1007","1107"
+	height (list of str) ... only flights on heights AGL in this list are returned (if no day is given, flights from all days are returned) - legal strings: "15","25","40","50","80"
+	loc (list of str) ... only flights on locations in this list are returned (if no day is given, flights from all days are returned) - legal strings: "canopyTU","canopyVT","meadow"
+	pops (bool) ... decides if the output-dict should have an entry "pops" containing a list of Pops-obj with data relative to ground, default-True
+	sen55 (bool) ... decides if the output-dict should have an entry "sen55" containing a list of SEN55-obj, default-False
+	ccs811 (bool) ... decides if the output-dict should have an entry "ccs811" containing a list of CCS811-obj, default-False
+	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default-"flights_lookuptable.csv" (see owncloud)

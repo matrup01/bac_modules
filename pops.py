@@ -18,7 +18,7 @@ class Pops:
     bgobj (Pops,optional) ... Takes another Pops-Object and corrects the data using the given Pops-Objects as Background \n
     box (bool,optional) ... Takes a Boolean to determine which file is given (True ... produced by the box;False ... produced by the POPS hooked to a laptop) default-True"""
     
-    def __init__(self,file,title="Kein Titel",start="none",end="none",bgobj="none",box=True,timecorr=23):
+    def __init__(self,file,title="Kein Titel",start="none",end="none",bgobj="none",box=True,timecorr=23,relobj="none"):
 
         #init vars
         self.filename = file
@@ -104,6 +104,11 @@ class Pops:
         #correctbg
         if type(bgobj) == Pops:
             self.importbg(bgobj.exportbg())
+            
+        #make values relative
+        if type(relobj) == Pops:
+            self.relativevals(relobj)
+            self.relative = True
         
     def internalbg(self,startmeasurementtime,bgcrop=0):
         
@@ -420,8 +425,6 @@ class Pops:
         
         
     def findplottype(self,y):
-        
-        
         
         #find correct plottype
         for i in range(len(self.plottypes)):
