@@ -2,6 +2,7 @@ import csv
 import datetime as dt
 import numpy as np
 import math
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.colors import LogNorm
@@ -24,7 +25,7 @@ class Pops:
         self.filename = file
         self.title = title
         self.relative = False
-        self.d_categories = [element * 1000 for element in [0.115,0.125,0.135,0.15,0.165,0.185,0.21,0.25,0.35,0.475,0.575,0.855,1.220,1.53,1.99,2.585,3.37]]
+        self.d_categories = [element * 1000 for element in [0.115,0.125,0.135,0.150,0.165,0.185,0.210,0.250,0.350,0.475,0.575,0.855,1.220,1.53,1.99,2.585,3.37]]
         self.plottypes = [["temp_bm680","temperature (bm680)","°C"],["hum_bm680","rel. humidity (bm680)","%"],["temp_sen55","temperature (sen55)","°C"],["hum_sen55","rel. humidity (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"]]
         self.plottypes2 = [["total","sum of all bins",r"Counts/$cm^3$"],["popstemp","temperature inside POPS-box","°C"],["boardtemp","boardtemp","°C"],["pops_pm25","PM2.5 from POPS",r"Counts/$cm^3$"],["pops_underpm25","particles smaller than sen55-pm25",r"Counts/$cm^3$"]]
         
@@ -67,7 +68,7 @@ class Pops:
                 if start == element:
                   t_start = tcounter
             popscounter = -1
-            unixstart = str(int(start[0:2])*3600+int(start[3:5])*60+int(start[6:8])-7177)
+            unixstart = str(int(start[0:2])*3600+int(start[3:5])*60+int(start[6:8])-7200 + timecorr)
             for element in [data[i][23][0:5] for i in range(1,len(data))]:
                 popscounter += 1
                 if unixstart == element:
@@ -83,7 +84,7 @@ class Pops:
                 if end == element:
                   t_end = tcounter
             popscounter = -1
-            unixend = str(int(end[0:2])*3600+int(end[3:5])*60+int(end[6:8])-7177)
+            unixend = str(int(end[0:2])*3600+int(end[3:5])*60+int(end[6:8])-7200 + timecorr)
             for element in [data[i][23][0:5] for i in range(1,len(data))]:
                 popscounter += 1
                 if unixend == element:
@@ -220,11 +221,11 @@ class Pops:
         ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
         ax.set_yscale("log")
         ax.set_ylabel("Durchmesser in nm")
-        plt.colorbar(im,ax=ax,label="dN/dlogdp")
+        plt.colorbar(im,ax=ax,label="dN/dlog$D_p$")
         plt.show()
         
         
-    def heatmap(self,ax,startcrop=0,endcrop=0,togglexticks=True,pad=5.2,location="top",togglecbar=True):
+    def heatmap(self,ax,startcrop=0,endcrop=0,togglexticks=True,orientation="horizontal",location="top",togglecbar=True):
         
         #convert to heatmapdata
         heatmapdata = [[self.pops_bins[j][i] / (math.log10(self.d_categories[j+1])-math.log10(self.d_categories[j])) for i in range(len(self.pops_bins[0])-1)] for j in range(len(self.pops_bins))]
@@ -239,25 +240,14 @@ class Pops:
         #draw plot
         im = ax.pcolormesh(xx,yy,heatmapdata,cmap="RdYlBu_r",norm=LogNorm(vmin=1,vmax=10000))
         ax.set_yscale("log")
-        ax.set_ylabel("Durchmesser in nm")
+        ax.set_ylabel("Durchmesser in $\mu$m")
+        ax.set_yticks(self.d_categories,labels=[str(self.d_categories[i]/1000) if len(str(self.d_categories[i]/1000)) == 5 else str(self.d_categories[i]/1000) + "0" for i in range(len(self.d_categories))])
         ax.axes.xaxis.set_visible(togglexticks)
+        ax.yaxis.set_tick_params(which='minor', size=0)
+        ax.yaxis.set_tick_params(which='minor', width=0)
+        ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
         if togglecbar:
-            if location == "top":
-                axins = inset_axes(ax,
-                        width="100%",  
-                        height="8%",
-                        loc='upper center',
-                        borderpad=-5
-                       )
-                plt.colorbar(im,cax=axins,label="dN/dlogdp",orientation="horizontal",pad=pad)
-            else: 
-                axins = inset_axes(ax,
-                        width="100%",  
-                        height="8%",
-                        loc='lower center',
-                        borderpad=-5
-                       )
-                plt.colorbar(im,cax=axins,label="dN/dlogdp",orientation="horizontal",pad=pad)
+            plt.colorbar(im,label="dN/dlog$D_p$",orientation=orientation,location=location)
         
         
     def dndlogdp(self,ax):
@@ -405,21 +395,36 @@ class Pops:
         
         for j in range(len(self.ydata)):
             newdata = []
-            for i in range(len(self.ydata[j])):
-                newdata.append(((self.ydata[j][i] / bgydata[j])-1)*100)
-            self.ydata[j] = copy(newdata)
+            if bgydata[j] > 0.0:
+                for i in range(len(self.ydata[j])):
+                    newdata.append(((self.ydata[j][i] / bgydata[j])-1)*100)
+                self.ydata[j] = copy(newdata)
+            else:
+                for i in range(len(self.ydata[j])):
+                    newdata.append((((self.ydata[j][i]+1) / (bgydata[j]+1))-1)*100)
+                self.ydata[j] = copy(newdata)
             
         for j in range(len(self.ydata2)):
             newdata = []
-            for i in range(len(self.ydata2[j])):
-                newdata.append(((self.ydata2[j][i] / bgydata2[j])-1)*100)
-            self.ydata2[j] = copy(newdata)
+            if bgydata2[j] > 0.0:
+                for i in range(len(self.ydata2[j])):
+                    newdata.append(((self.ydata2[j][i] / bgydata2[j])-1)*100)
+                self.ydata2[j] = copy(newdata)
+            else:
+                for i in range(len(self.ydata2[j])):
+                    newdata.append((((self.ydata2[j][i]+1) / (bgydata2[j]+1))-1)*100)
+                self.ydata2[j] = copy(newdata)
             
         for j in range(len(self.pops_bins)):
             newdata = []
-            for i in range(len(self.pops_bins[j])):
-                newdata.append(((self.pops_bins[j][i] / bgpops_bins[j])-1)*100)
-            self.pops_bins[j] = copy(newdata)
+            if bgpops_bins[j] > 0.0:
+                for i in range(len(self.pops_bins[j])):
+                    newdata.append(((self.pops_bins[j][i] / bgpops_bins[j])-1)*100)
+                self.pops_bins[j] = copy(newdata)
+            else:
+                for i in range(len(self.pops_bins[j])):
+                    newdata.append((((self.pops_bins[j][i]+1) / (bgpops_bins[j])+1)-1)*100)
+                self.pops_bins[j] = copy(newdata)
             
         self.relative = True
         
@@ -457,6 +462,7 @@ class Pops:
                 return plotx,ploty,label,ylabel
             
         output = "Unknown y: y must be one of the following strings: " + "".join([self.plottypes[i][0]+", " for i in range(len(self.plottypes))])
+        output += "".join([self.plottypes2[i][0]+", " for i in range(len(self.plottypes2))])
         output += "".join(["b"+str(i)+", " for i in range(15)])
         output += "b15"
         

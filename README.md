@@ -87,7 +87,7 @@
 	startcrop (int, optional) ... Takes an int and crops the beginning of the plot by its amount seconds
 	endcrop (int, optional) ... Takes an int and crops the end of the plot by its amount seconds
 	togglexticks (bool, optional) ... takes a boolean to decide if the x-ticks of ax should be visible, default-True
-	pad (float, optional) ... takes a float to change the distance between plot and cmap, default-5.2
+	orientation (str, optional) ... takes a str to change the orientation of the colorbar, default - "horizontal"
 	location (str, optional) ... takes a str to change the location of the colorbar relative to the plot, default-"top"
 	togglecbar (bool, optional) ... takes a bool to determine if the cbar should be drawn, default-True
 	
@@ -132,7 +132,7 @@
 
 	y (str) ... takes a string to determine which y should be plotted 
 
-	Accepted strings: temp_bme680, hum_bme680, temp_sen55, hum_sen55, druck, gas, pm1, pm25, pm4, pm10, voc, nox, co2, tvoc, popstemp, boardtemp, total, every other str containing one of the numbers 0-15 will be interpreted as a bin
+	Accepted strings: temp_bme680, hum_bme680, temp_sen55, hum_sen55, druck, gas, pm1, pm25, pm4, pm10, voc, nox, co2, tvoc, popstemp, boardtemp, total, pops_pm25, pops_underpm25, every other str containing one of the numbers 0-15 will be interpreted as a bin
 
 1.17  Pops.replacezeros(data)
 
@@ -351,14 +351,33 @@
 	
 6.    getdata.py
 
-6.1   getdata(day,height,loc,pops,sen55,ccs811,file)
+6.1   getdata(day,height,loc,bgstart,pops,sen55,ccs811,file)
 
 	returns a dictionary containing lists of data-objects (Pops,SEN55,CCS811) of all flights that meet certain criteria (day,height,loc) which are specified on a lookuptable
 	
 	day (list of str) ... only flights on days in this list are returned (if no day is given, flights from all days are returned) - legal strings: "1106","1206","1306","1406","0807","0907","1007","1107"
 	height (list of str) ... only flights on heights AGL in this list are returned (if no day is given, flights from all days are returned) - legal strings: "15","25","40","50","80"
 	loc (list of str) ... only flights on locations in this list are returned (if no day is given, flights from all days are returned) - legal strings: "canopyTU","canopyVT","meadow"
+	bgstart (str) ... only flight with exact bgstart is returned (can be used to filter for exact flights) - check lookuptable for legal strings
 	pops (bool) ... decides if the output-dict should have an entry "pops" containing a list of Pops-obj with data relative to ground, default-True
 	sen55 (bool) ... decides if the output-dict should have an entry "sen55" containing a list of SEN55-obj, default-False
 	ccs811 (bool) ... decides if the output-dict should have an entry "ccs811" containing a list of CCS811-obj, default-False
 	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default-"flights_lookuptable.csv" (see owncloud)
+	
+6.2   flightvals(day,flight,file)
+
+	takes a day and a flightnumber and returns a list with getdata()-readable data: [day,bgstart,loc,height]
+	
+	day (str) ... decides the day - legal strings: "1106","1206","1306","1406","0807","0907","1007","1107"
+	flight (int) ... decides which flight (assumes flights on each day are numbered 1-n) - for legal ints see lookuptable
+	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default-"flights_lookuptable.csv" (see owncloud)
+	
+6.3   flightsummary(day,flight,y,file,ylims)
+
+	takes a day and a flightnumber and draws boxplots of the data y of every height and loc on the given flight
+	
+	day (str) ... decides the day - legal strings: "1106","1206","1306","1406","0807","0907","1007","1107"
+	flight (int) ... decides which flight (assumes flights on each day are numbered 1-n) - for legal ints see lookuptable
+	y (str) ... decides which data should be shown in the boxplot - for legal strings see 1.16
+	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default-"flights_lookuptable.csv" (see owncloud)
+	ylims (list of int) ... takes a list of int with two entrys and uses them as ylims for the boxplot-graph - default: [-100,300]

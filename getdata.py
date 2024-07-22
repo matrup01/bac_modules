@@ -2,8 +2,10 @@ from pops import Pops
 from sen55 import SEN55
 from ccs811 import CCS811
 import csv
+import itertools
+import matplotlib.pyplot as plt
 
-def getdata(day=["*"],height=["*"],loc=["*"],pops=True,sen55=False,ccs811=False,file="flights_lookuptable.csv"):
+def getdata(day=["*"],height=["*"],loc=["*"],bgstart="",pops=True,sen55=False,ccs811=False,file="flights_lookuptable.csv"):
     
     #import flight-file
     raw_data = csv.reader(open(file),delimiter=",")
@@ -32,6 +34,12 @@ def getdata(day=["*"],height=["*"],loc=["*"],pops=True,sen55=False,ccs811=False,
             if not raw_data[i][2] in loc:
                 mask[i] = 0
                 
+    #check if flight has certain bgstart
+    if bgstart != "":
+        for i in range(len(mask)):
+            if bgstart != raw_data[i][3]:
+                mask[i] = 0
+                
     #mask out flights that dont meet criteria
     data = []
     for dat,decider in zip(raw_data,mask):
@@ -40,7 +48,8 @@ def getdata(day=["*"],height=["*"],loc=["*"],pops=True,sen55=False,ccs811=False,
                 
     #create Pops-Objects
     if pops:
-        popsout = [Pops(file=data[i][7],start=data[i][5],end=data[i][6],timecorr=int(data[i][10]),relobj=Pops(file=data[i][7],start=data[i][3],end=data[i][4],timecorr=int(data[i][10]))) for i in range(len(data))]
+        relobjs = [Pops(file=data[i][7],start=data[i][3],end=data[i][4],timecorr=int(data[i][10])) for i in range(len(data))]
+        popsout = [Pops(file=data[i][7],start=data[i][5],end=data[i][6],timecorr=int(data[i][10]),title=(data[i][0]+data[i][5]),relobj=relobjs[i]) for i in range(len(data))]
         out["pops"] = popsout
     
     #create SEN55-Objects
@@ -54,3 +63,73 @@ def getdata(day=["*"],height=["*"],loc=["*"],pops=True,sen55=False,ccs811=False,
         out["ccs811"] = ccsout
     
     return out
+
+
+def flightvals(day,flight,file="flights_lookuptable.csv"):
+    
+    #import flight-file
+    raw_data = csv.reader(open(file),delimiter=",")
+    raw_data = list(raw_data)
+    
+    #crop data
+    data = []
+    for element in raw_data:
+        if element[0] == day:
+            data.append(element)
+            
+    #find flight
+    flights = list(set([data[i][3] for i in range(len(data))]))
+    flights.sort()
+    bgstart = flights[flight-1]
+    
+    #find vals
+    vals = []
+    for element in data:
+        if element[3] == bgstart:
+            val = element[2] + element[1]
+            vals.append(val)
+    vals = list(set(vals))
+    
+    #outputs: [day,bgstart,loc,height]
+    output = [[day,bgstart,"".join(element[i] for i in range(len(element)-2)),"".join(element[i] for i in range(len(element)-2,len(element)))] for element in vals]
+    
+    return output
+
+
+def flightsummary(day,flight,y,file="flights_lookuptable.csv",ylims=[-100,300]):
+    
+    #init variables
+    correctflights = flightvals(day,flight,file=file)
+    ylabel = y if y != "pops_underpm25" else "small particles"
+    title = day + " " + "flight" + str(flight) + " " + ylabel
+    labels = []
+    totaly = []
+    
+    #get data
+    for element in correctflights:
+        
+        data = getdata(day=[element[0]],height=[element[3]],loc=[element[2]],bgstart=element[1],file=file)
+        
+        label = element[2] + " " + element[3] + "m"
+        ydata = [dat.returndata(y) for dat in data["pops"]]
+        
+        if len(ydata) == 1:
+            ydata = ydata[0]
+        else:
+            ydata = list(itertools.chain(*ydata))
+        
+        labels.append(label)
+        totaly.append(ydata)
+        
+    #draw plot
+    fig,ax = plt.subplots()
+
+    plt.title(title)
+    ax.violinplot(dataset=totaly,showmeans=False,showmedians=False,showextrema=False)
+    ax.boxplot(x=totaly,labels=labels,showmeans=True,showfliers=False)
+    ax.set_ylabel("% of background")
+    ax.set_ylim(ylims)
+
+    plt.show()
+
+    
