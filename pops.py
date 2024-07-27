@@ -2,29 +2,33 @@ import csv
 import datetime as dt
 import numpy as np
 import math
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as md
 from matplotlib.colors import LogNorm
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from copy import copy
 
 class Pops:
     
     """full documentation see https://github.com/matrup01/bac_modules \n 
-    file (str) ... Takes a POPS-produced csv-file (zB '112233.csv') \n
-    title (str,optional) ... Takes a str and uses it as a title for quickplots \n
-    start (str,optional) ... Takes a str in 'hh:mm:ss'-format and only imports data acquired after that timestamp \n
-    end (str,optional) ... Takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp \n
-    bgobj (Pops,optional) ... Takes another Pops-Object and corrects the data using the given Pops-Objects as Background \n
-    box (bool,optional) ... Takes a Boolean to determine which file is given (True ... produced by the box;False ... produced by the POPS hooked to a laptop) default-True"""
+
+	file (str) ... Takes a POPS-produced csv-file (eg '112233.csv') \n
+
+	title (str,optional) ... Takes a str and uses it as a title for quickplots
+	start (str,optional) ... Takes a str in 'hh:mm:ss'-format and only imports data acquired after that timestamp \n
+	end (str,optional) ... Takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp \n
+	bgobj (Pops,optional) ... Takes another Pops-Object and corrects the data using the given Pops-Objects as Background \n
+	box (bool,optional) ... Takes a Boolean to determine which file is given (True ... produced by the box;False ... produced by the POPS hooked to a laptop) default-True \n
+	timecorr (int,optional) ... Takes an int and corrects popstime by it, default-23 \n
+	relobj(Pops,optional) ... Takes a Pops object and displays all data as relative to the mean of it \n
+	deviate(bool,optional) ... decides if values should be expressed as relatives to mean, default-False"""
     
-    def __init__(self,file,title="Kein Titel",start="none",end="none",bgobj="none",box=True,timecorr=23,relobj="none"):
+    def __init__(self,file,title="Kein Titel",start="none",end="none",bgobj="none",box=True,timecorr=23,relobj="none",deviate=False):
 
         #init vars
         self.filename = file
         self.title = title
         self.relative = False
+        self.deviated = False
         self.d_categories = [element * 1000 for element in [0.115,0.125,0.135,0.150,0.165,0.185,0.210,0.250,0.350,0.475,0.575,0.855,1.220,1.53,1.99,2.585,3.37]]
         self.plottypes = [["temp_bm680","temperature (bm680)","°C"],["hum_bm680","rel. humidity (bm680)","%"],["temp_sen55","temperature (sen55)","°C"],["hum_sen55","rel. humidity (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"]]
         self.plottypes2 = [["total","sum of all bins",r"Counts/$cm^3$"],["popstemp","temperature inside POPS-box","°C"],["boardtemp","boardtemp","°C"],["pops_pm25","PM2.5 from POPS",r"Counts/$cm^3$"],["pops_underpm25","particles smaller than sen55-pm25",r"Counts/$cm^3$"]]
@@ -110,6 +114,11 @@ class Pops:
         if type(relobj) == Pops:
             self.relativevals(relobj)
             self.relative = True
+            
+        #make values relative to mean
+        if deviate:
+            self.deviatefrommean()
+            self.deviated = True
         
     def internalbg(self,startmeasurementtime,bgcrop=0):
         
@@ -221,6 +230,7 @@ class Pops:
         ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
         ax.set_yscale("log")
         ax.set_ylabel("Durchmesser in nm")
+        ax.set_xlabel("CET")
         plt.colorbar(im,ax=ax,label="dN/dlog$D_p$")
         plt.show()
         
@@ -241,6 +251,7 @@ class Pops:
         im = ax.pcolormesh(xx,yy,heatmapdata,cmap="RdYlBu_r",norm=LogNorm(vmin=1,vmax=10000))
         ax.set_yscale("log")
         ax.set_ylabel("Durchmesser in $\mu$m")
+        ax.set_xlabel("CET")
         ax.set_yticks(self.d_categories,labels=[str(self.d_categories[i]/1000) if len(str(self.d_categories[i]/1000)) == 5 else str(self.d_categories[i]/1000) + "0" for i in range(len(self.d_categories))])
         ax.axes.xaxis.set_visible(togglexticks)
         ax.yaxis.set_tick_params(which='minor', size=0)
@@ -387,6 +398,32 @@ class Pops:
         return newpops
     
     
+    def deviatefrommean(self):
+        
+        for element in self.ydata:
+            
+            mean = np.mean(element)
+            
+            for i in range(len(element)):
+                element[i] = ((element[i] / mean) - 1)*100
+                
+        for element in self.ydata2:
+            
+            mean = np.mean(element)
+            
+            for i in range(len(element)):
+                element[i] = ((element[i] / mean) - 1)*100
+                
+        for element in self.pops_bins:
+            
+            mean = np.mean(element)
+            
+            for i in range(len(element)):
+                element[i] = ((element[i] / mean) - 1)*100
+                
+        self.deviated = True
+    
+    
     def relativevals(self,bgobj):
 
         bgydata = [bgobj.returnstats(bgobj.plottypes[i][0])[0] for i in range(len(bgobj.plottypes))]            
@@ -438,6 +475,8 @@ class Pops:
                 ploty = self.ydata[i]
                 label = self.plottypes[i][1]
                 ylabel = self.plottypes[i][2] if not self.relative else "% of background"
+                if self.deviated:
+                    ylabel = "%  deviation from mean"
                 
                 return plotx,ploty,label,ylabel
             
@@ -449,6 +488,8 @@ class Pops:
                 ploty = self.ydata2[i]
                 label = self.plottypes2[i][1]
                 ylabel = self.plottypes2[i][2] if not self.relative else "% of background"
+                if self.deviated:
+                    ylabel = "%  deviation from mean"
             
                 return plotx,ploty,label,ylabel
             
@@ -458,6 +499,8 @@ class Pops:
                 ploty = self.pops_bins[i]
                 label = "b" + str(i)
                 ylabel = r"Counts/$cm^3$" if not self.relative else "% of background"
+                if self.deviated:
+                    ylabel = "%  deviation from mean"
                 
                 return plotx,ploty,label,ylabel
             

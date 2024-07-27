@@ -8,10 +8,11 @@ import math
 
 class CCS811:
     
-    def __init__(self,file,start="none",end="none",title="no title"):
+    def __init__(self,file,start="none",end="none",title="no title",deviate=False):
         
         #init
         self.title = title
+        self.deviated = False
         
         #read data from csv to list
         data = csv.reader(open(file),delimiter=",")
@@ -47,12 +48,19 @@ class CCS811:
         for i in range(len(self.y)):
             self.y[i][0] = [self.y[i][0][j] for j in range(start_i,end_i)]
             
+        #express data as relative from mean
+        if deviate:
+            self.deviatefrommean()
+            
             
     def findplot(self,y):
         
         try:
             loc = self.finder[y]
             yy = self.y[loc]
+            
+            if self.deviated:
+                yy[2] = "%  deviation from mean"
         except:
             raise ValueError("Invalid plottype: plot has to be one of the following strings: pm1,pm25,pm4,pm10,temp,hum")
             
@@ -63,9 +71,10 @@ class CCS811:
         
         fig,ax = plt.subplots()
         plt.title(self.title)
+        yy = self.findplot("tvoc")
 
-        ax.plot(self.t,self.y[0][0])
-        ax.set_ylabel(self.y[0][1] + " in " + self.y[0][2])
+        ax.plot(self.t,yy[0])
+        ax.set_ylabel(yy[1] + " in " + yy[2])
         ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
         
         plt.show()
@@ -126,6 +135,18 @@ class CCS811:
         self.t = meant
         for i in range(len(self.y)):
             self.y[i][0] = meany[i]
+            
+    
+    def deviatefrommean(self):
+        
+        for element in self.y:
+            
+            mean = np.mean(element[0])
+            
+            for i in range(len(element[0])):
+                element[0][i] = ((element[0][i] / mean) - 1)*100
+                
+        self.deviated = True
 
 
 def quickplot(file): #legacy function; use CCS811-Object instead

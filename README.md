@@ -12,8 +12,9 @@
 	end (str,optional) ... Takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp
 	bgobj (Pops,optional) ... Takes another Pops-Object and corrects the data using the given Pops-Objects as Background
 	box (bool,optional) ... Takes a Boolean to determine which file is given (True ... produced by the box;False ... produced by the POPS hooked to a laptop) default-True
-   timecorr (int,optional) ... Takes an int and corrects popstime by it, default-23
-   relobj(Pops,optional) ... Takes a Pops object and displays all data as relative to the mean of it (see 1.22)
+	timecorr (int,optional) ... Takes an int and corrects popstime by it, default-23
+	relobj(Pops,optional) ... Takes a Pops object and displays all data as relative to the mean of it (see 1.22)
+	deviate(bool,optional) ... decides if values should be expressed as relatives to mean, default-False
 
 1.2   Pops.internalbg(startmeasurementtime)
 
@@ -166,6 +167,10 @@
 	changes all data to relative to the mean of the bgobj
 	
 	bgobj (Pops-obj) ... takes a Pops object to whichs mean data should be relative to
+	
+1.23  Pops.deviatefrommean()
+
+	changes all values to be expressed relative to the mean
 
 
 2.    fluoreszenz.py
@@ -244,6 +249,7 @@
 	start (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired after that timestamp
 	end (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp
 	title (str, optional) ... takes a str and uses it as a title for quickplots
+	deviate (bool, optional) ... takes a bool to decide if the data should be expressed relative to mean, default-False
 
 3.2   CCS811.plot(ax,y)
 
@@ -272,6 +278,10 @@
 3.6   CCS811.returndata(y)
 
 	returns a list of the data y
+	
+3.7   CCS811.deviatefrommean()
+
+	changes all values to be expressed relative to the mean
 
 
 4.    drone.py
@@ -319,6 +329,7 @@
 	start (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired after that timestamp
 	end (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp
 	title (str, optional) ... takes a str and uses it as a title for quickplots
+	deviate (bool, optional) ... takes a bool to decide if the data should be expressed relative to mean, default-False
 
 5.2   SEN55.plot(ax,y)
 
@@ -348,6 +359,10 @@
 
 	returns a list of the data y
 	
+5.7   SEN55.deviatefrommean()
+
+	changes all values to be expressed relative to the mean
+	
 	
 6.    getdata.py
 
@@ -372,12 +387,22 @@
 	flight (int) ... decides which flight (assumes flights on each day are numbered 1-n) - for legal ints see lookuptable
 	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default-"flights_lookuptable.csv" (see owncloud)
 	
-6.3   flightsummary(day,flight,y,file,ylims)
+6.3   flightsummary(day,flight,y,file,ylims,averaged)
 
 	takes a day and a flightnumber and draws boxplots of the data y of every height and loc on the given flight
 	
 	day (str) ... decides the day - legal strings: "1106","1206","1306","1406","0807","0907","1007","1107"
 	flight (int) ... decides which flight (assumes flights on each day are numbered 1-n) - for legal ints see lookuptable
 	y (str) ... decides which data should be shown in the boxplot - for legal strings see 1.16
-	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default-"flights_lookuptable.csv" (see owncloud)
-	ylims (list of int) ... takes a list of int with two entrys and uses them as ylims for the boxplot-graph - default: [-100,300]
+	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default - "flights_lookuptable.csv" (see owncloud)
+	ylims (list of int) ... takes a list of int with two entrys and uses them as ylims for the boxplot-graph, default - [-100,300]
+	averaged (bool) ... if True boxplots will be drawn from minutewise averaged data instead of raw data, default - False
+	
+6.4   means(flightlist,y,outputfilename,file)
+
+	takes a list of linenumbers of the lookuptable and returns a list of lists in the form [[mean,rawdata],...] for each flight and saves it as /json/y/outputfilename.json
+	
+	flightlist(list of int) ... decides which flights (linenumbers of lookuptable) should be used
+	y (str) ... decides which data should be used - for legal strings see 1.16
+	outputfilename (str) ... data will be saved as outputfilename.json
+	file (str) ... takes a csv-file and uses it as a lookuptable for flights, default - "flights_lookuptable.csv" (see owncloud)

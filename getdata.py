@@ -4,6 +4,9 @@ from ccs811 import CCS811
 import csv
 import itertools
 import matplotlib.pyplot as plt
+import numpy as np
+import json
+import os
 
 def getdata(day=["*"],height=["*"],loc=["*"],bgstart="",pops=True,sen55=False,ccs811=False,file="flights_lookuptable.csv"):
     
@@ -96,7 +99,7 @@ def flightvals(day,flight,file="flights_lookuptable.csv"):
     return output
 
 
-def flightsummary(day,flight,y,file="flights_lookuptable.csv",ylims=[-100,300]):
+def flightsummary(day,flight,y,file="flights_lookuptable.csv",ylims=[-100,300],averaged=False):
     
     #init variables
     correctflights = flightvals(day,flight,file=file)
@@ -110,6 +113,10 @@ def flightsummary(day,flight,y,file="flights_lookuptable.csv",ylims=[-100,300]):
         
         data = getdata(day=[element[0]],height=[element[3]],loc=[element[2]],bgstart=element[1],file=file)
         
+        if averaged:
+            for dat in data["pops"]:
+                dat.average()
+        
         label = element[2] + " " + element[3] + "m"
         ydata = [dat.returndata(y) for dat in data["pops"]]
         
@@ -121,15 +128,52 @@ def flightsummary(day,flight,y,file="flights_lookuptable.csv",ylims=[-100,300]):
         labels.append(label)
         totaly.append(ydata)
         
+        
     #draw plot
     fig,ax = plt.subplots()
 
     plt.title(title)
     ax.violinplot(dataset=totaly,showmeans=False,showmedians=False,showextrema=False)
     ax.boxplot(x=totaly,labels=labels,showmeans=True,showfliers=False)
+    for i in range(len(totaly)):
+        mean = np.mean(totaly[i])
+        std = np.std(totaly[i],ddof=1)
+        stdy = [mean+std,mean-std]
+        ax.scatter(x=[i+1,i+1],y=stdy,color="tab:purple",marker="x")
     ax.set_ylabel("% of background")
     ax.set_ylim(ylims)
 
     plt.show()
 
+ 
+def means(flightlist,y,outputfilename,file="flights_lookuptable.csv"): # takes a list of linenumbers of the flights from lookuptable
+
+    #import flight-file
+    raw_data = csv.reader(open(file),delimiter=",")
+    data = list(raw_data)
     
+    means = []
+    
+    for element in flightlist:
+        element -= 1
+        relobj = Pops(file=data[element][7],start=data[element][3],end=data[element][4],timecorr=int(data[element][10])) 
+        pops = Pops(file=data[element][7],start=data[element][5],end=data[element][6],timecorr=int(data[element][10]),title=(data[element][0]+data[element][5]),relobj=relobj)
+        
+        means.append([pops.returnstats(y)[0],pops.returndata(y)])
+       
+    path = os.path.dirname(os.path.abspath(__file__))
+    
+    if not ".json" in outputfilename:
+        outputfilename += ".json"
+        
+    if not os.path.exists(path + "/json"):
+        os.makedirs(path + "/json")
+        
+    if not os.path.exists(path + "/json/" + y):
+        os.makedirs(path + "/json/" + y)
+        
+    fullpath = path + "/json/" + y + "/" + outputfilename
+    
+    f = open(fullpath,"w")
+    json.dump(means,f)
+    f.close()

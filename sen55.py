@@ -3,16 +3,16 @@ import matplotlib.dates as md
 import datetime as dt
 import csv
 import matplotlib.pyplot as plt
-import tikzplotlib
 import math
 
 
 class SEN55:
     
-    def __init__(self,file,start="none",end="none",title="no title"):
+    def __init__(self,file,start="none",end="none",title="no title",deviate=False):
         
         #init
         self.title = title
+        self.deviated = False
         
         #read data from csv to list
         data = csv.reader(open(file),delimiter=",")
@@ -59,11 +59,19 @@ class SEN55:
         for i in range(len(self.y)):
             self.y[i][0] = [self.y[i][0][j] for j in range(start_i,end_i)]
             
+            
+        #express data as relative from mean
+        if deviate:
+            self.deviatefrommean()
+            
     def findplot(self,y):
         
         try:
             loc = self.finder[y]
             yy = self.y[loc]
+            
+            if self.deviated:
+                yy[2] = "%  deviation from mean"
         except:
             raise ValueError("Invalid plottype: plot has to be one of the following strings: pm1,pm25,pm4,pm10,temp,hum")
             
@@ -137,6 +145,18 @@ class SEN55:
         self.t = meant
         for i in range(len(self.y)):
             self.y[i][0] = meany[i]
+            
+                
+    def deviatefrommean(self):
+        
+        for element in self.y:
+            
+            mean = np.mean(element[0])
+            
+            for i in range(len(element[0])):
+                element[0][i] = ((element[0][i] / mean) - 1)*100
+                
+        self.deviated = True
     
 
 def quickplot(file): #legacy function; use SEN55-Object instead
@@ -202,5 +222,7 @@ def plot(file,ax,plot,startcrop=0,endcrop=0,color="tab:red",plotlabel="none"): #
     
     ax.plot(t,yy[0],label=label,color=color)
     ax.set_ylabel(yy[1] + " in " + yy[2])
+    
+
     
     
