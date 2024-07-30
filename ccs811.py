@@ -8,6 +8,15 @@ import math
 
 class CCS811:
     
+    """full documentation see https://github.com/matrup01/bac_modules \n
+    
+    file (str) ... takes a ccs811-produced csv-file\n
+	
+	start (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired after that timestamp\n
+	end (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp\n
+	title (str, optional) ... takes a str and uses it as a title for quickplots\n
+	deviate (bool, optional) ... takes a bool to decide if the data should be expressed relative to mean, default-False\n"""
+    
     def __init__(self,file,start="none",end="none",title="no title",deviate=False):
         
         #init

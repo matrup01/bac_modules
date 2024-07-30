@@ -6,6 +6,16 @@ import matplotlib.dates as md
 
 class FData:
     
+    """full documentation see https://github.com/matrup01/bac_modules \n \n
+    
+    file (str) ... takes an FSpec-produced csv-file\n\n
+
+	title (str, optional) ... takes a str and uses it as a title for quickplots\n
+	encoding_artifacts (bool, optional) ... takes a boolean to determine if there are encoding artifacts that need to be removed, default-True\n
+	start (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired after that timestamp\n
+	end (str,optional) ... takes a str in 'hh:mm:ss'-format and only imports data acquired before that timestamp\n
+	skiprows (int, optional) ... takes an int and skips the first rows (may be used if the first rows are corrupted), default-0"""
+    
     def __init__(self,file,title="kein Titel",encoding_artifacts=True,start="none",end="none",skiprows=0):
         
         #reads data from csv to list

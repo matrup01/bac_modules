@@ -6,6 +6,9 @@ import branca.colormap as cm
 
 class Dronedata:
     
+    """full documentation see https://github.com/matrup01/bac_modules \n
+    
+    file (str) ... takes a drone-produced csv-file"""
     
     def __init__(self,file):
         
