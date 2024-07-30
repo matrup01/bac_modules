@@ -177,3 +177,42 @@ def means(flightlist,y,outputfilename,file="flights_lookuptable.csv"): # takes a
     f = open(fullpath,"w")
     json.dump(means,f)
     f.close()
+    
+    
+def plotmeans(jsonlist,y,title="",customlabels=""): #jsonfiles have to be named filenameAltitude.json, to work properly. eg canopyTU40.json
+    
+    path = os.path.dirname(os.path.abspath(__file__))
+    
+    fig,ax = plt.subplots()
+    
+    for i in range(len(jsonlist)):
+        
+        if not ".json" in jsonlist[i]:
+            jsonlist[i] += ".json"
+            
+        f = open(path + "/json/" + y + "/" + jsonlist[i])
+        data = json.load(f)
+        
+        xx = [i for j in range(len(data))]
+        yy = [element[0] for element in data]
+        meanlist = [element[1] for element in data]
+        mean = np.mean(list(itertools.chain(*meanlist)))
+        
+        ax.scatter(xx,yy,color="black")
+        ax.scatter(i,mean,color="tab:blue")
+        
+    ax.set_ylabel("% of background")
+    if customlabels == "":
+        labels = [jsonlist[i][-7] + jsonlist[i][-6] + "m" for i in range(len(jsonlist))]
+    else:
+        labels = customlabels
+    ax.set_xticks(list(range(len(jsonlist))), labels=labels)
+    ax.set_xlim([-1,len(jsonlist)])
+    if title != "":
+        plt.title(title)
+    
+    plt.show()
+        
+        
+        
+        

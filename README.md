@@ -404,5 +404,15 @@
 	
 	flightlist(list of int) ... decides which flights (linenumbers of lookuptable) should be used
 	y (str) ... decides which data should be used - for legal strings see 1.16
-	outputfilename (str) ... data will be saved as outputfilename.json
+	outputfilename (str) ... data will be saved as outputfilename.json (to have the labeling in getdata.plotmeans() work properly files should be named name_Altitude.json, eg canopy_40.json)
 	file (str) ... takes a csv-file and uses it as a lookuptable for flights, default - "flights_lookuptable.csv" (see owncloud)
+	
+6.5   plotmeans(jsonlist,y)
+
+	takes a list of getdata.means()-generated .json-files and plots them
+	
+	jsonlist (list of str) ... imports given .json-files
+	y (str) ... decides which data should be plotted - for legal strings see 1.16 (technically strings are only legal after the corresponding .json-file has been created)
+	
+	title (str, optional) ... if a title is given, the plot will have a title
+	customlabels (list of str, optional) ... if customlabels are given they will be used as xlabels (if the jsonfiles are named in the form name_Altitude.json xlabels will be the altitudes by default)

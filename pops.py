@@ -226,7 +226,7 @@ class Pops:
         
         #draw plot
         fig,ax = plt.subplots()
-        im = ax.pcolormesh(xx,yy,heatmapdata,cmap="rainbow",norm=LogNorm())
+        im = ax.pcolormesh(xx,yy,heatmapdata,cmap="RdYlBu_r",norm=LogNorm())
         ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
         ax.set_yscale("log")
         ax.set_ylabel("Durchmesser in nm")
@@ -235,7 +235,7 @@ class Pops:
         plt.show()
         
         
-    def heatmap(self,ax,startcrop=0,endcrop=0,togglexticks=True,orientation="horizontal",location="top",togglecbar=True):
+    def heatmap(self,ax,startcrop=0,endcrop=0,togglexticks=True,orientation="horizontal",location="top",togglecbar=True,pad=0):
         
         #convert to heatmapdata
         heatmapdata = [[self.pops_bins[j][i] / (math.log10(self.d_categories[j+1])-math.log10(self.d_categories[j])) for i in range(len(self.pops_bins[0])-1)] for j in range(len(self.pops_bins))]
@@ -251,14 +251,14 @@ class Pops:
         im = ax.pcolormesh(xx,yy,heatmapdata,cmap="RdYlBu_r",norm=LogNorm(vmin=1,vmax=10000))
         ax.set_yscale("log")
         ax.set_ylabel("Durchmesser in $\mu$m")
-        ax.set_xlabel("CET")
+        #ax.set_xlabel("CET")
         ax.set_yticks(self.d_categories,labels=[str(self.d_categories[i]/1000) if len(str(self.d_categories[i]/1000)) == 5 else str(self.d_categories[i]/1000) + "0" for i in range(len(self.d_categories))])
         ax.axes.xaxis.set_visible(togglexticks)
         ax.yaxis.set_tick_params(which='minor', size=0)
         ax.yaxis.set_tick_params(which='minor', width=0)
         ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
         if togglecbar:
-            plt.colorbar(im,label="dN/dlog$D_p$",orientation=orientation,location=location)
+            plt.colorbar(im,label="dN/dlog$D_p$",orientation=orientation,location=location,pad=pad)
         
         
     def dndlogdp(self,ax):
