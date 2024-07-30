@@ -31,7 +31,7 @@ class Pops:
         self.deviated = False
         self.d_categories = [element * 1000 for element in [0.115,0.125,0.135,0.150,0.165,0.185,0.210,0.250,0.350,0.475,0.575,0.855,1.220,1.53,1.99,2.585,3.37]]
         self.plottypes = [["temp_bm680","temperature (bm680)","°C"],["hum_bm680","rel. humidity (bm680)","%"],["temp_sen55","temperature (sen55)","°C"],["hum_sen55","rel. humidity (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"]]
-        self.plottypes2 = [["total","sum of all bins",r"Counts/$cm^3$"],["popstemp","temperature inside POPS-box","°C"],["boardtemp","boardtemp","°C"],["pops_pm25","PM2.5 from POPS",r"Counts/$cm^3$"],["pops_underpm25","particles smaller than sen55-pm25",r"Counts/$cm^3$"]]
+        self.plottypes2 = [["total","sum of all bins",r"Counts/$cm^3$"],["popstemp","temperature inside POPS-box","°C"],["boardtemp","boardtemp","°C"],["pops_pm25","PM2.5 from POPS",r"Counts/$cm^3$"],["pops_underpm25","particles smaller than 350 nm",r"Counts/$cm^3$"]]
         
         #reads data from csv to list
         data = csv.reader(open(file),delimiter=",")

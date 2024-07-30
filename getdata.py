@@ -8,7 +8,7 @@ import numpy as np
 import json
 import os
 
-def getdata(day=["*"],height=["*"],loc=["*"],bgstart="",pops=True,sen55=False,ccs811=False,file="flights_lookuptable.csv"):
+def getdata(day=["*"],height=["*"],loc=["*"],bgstart="",pops=True,sen55=False,ccs811=False,file="flights_lookuptable.csv",absvals=False):
     
     #import flight-file
     raw_data = csv.reader(open(file),delimiter=",")
@@ -51,9 +51,13 @@ def getdata(day=["*"],height=["*"],loc=["*"],bgstart="",pops=True,sen55=False,cc
                 
     #create Pops-Objects
     if pops:
-        relobjs = [Pops(file=data[i][7],start=data[i][3],end=data[i][4],timecorr=int(data[i][10])) for i in range(len(data))]
-        popsout = [Pops(file=data[i][7],start=data[i][5],end=data[i][6],timecorr=int(data[i][10]),title=(data[i][0]+data[i][5]),relobj=relobjs[i]) for i in range(len(data))]
-        out["pops"] = popsout
+        if not absvals:
+            relobjs = [Pops(file=data[i][7],start=data[i][3],end=data[i][4],timecorr=int(data[i][10])) for i in range(len(data))]
+            popsout = [Pops(file=data[i][7],start=data[i][5],end=data[i][6],timecorr=int(data[i][10]),title=(data[i][0]+data[i][5]),relobj=relobjs[i]) for i in range(len(data))]
+            out["pops"] = popsout
+        else:
+            popsout = [Pops(file=data[i][7],start=data[i][5],end=data[i][6],timecorr=int(data[i][10]),title=(data[i][0]+data[i][5])) for i in range(len(data))]
+            out["pops"] = popsout
     
     #create SEN55-Objects
     if sen55:
@@ -99,19 +103,19 @@ def flightvals(day,flight,file="flights_lookuptable.csv"):
     return output
 
 
-def flightsummary(day,flight,y,file="flights_lookuptable.csv",ylims=[-100,300],averaged=False):
+def flightsummary(day,flight,y,file="flights_lookuptable.csv",ylims=[-100,300],averaged=False,absvals=False,title=True):
     
     #init variables
     correctflights = flightvals(day,flight,file=file)
     ylabel = y if y != "pops_underpm25" else "small particles"
-    title = day + " " + "flight" + str(flight) + " " + ylabel
+    titlestr = day + " " + "flight" + str(flight) + " " + ylabel
     labels = []
     totaly = []
     
     #get data
     for element in correctflights:
         
-        data = getdata(day=[element[0]],height=[element[3]],loc=[element[2]],bgstart=element[1],file=file)
+        data = getdata(day=[element[0]],height=[element[3]],loc=[element[2]],bgstart=element[1],file=file,absvals=absvals)
         
         if averaged:
             for dat in data["pops"]:
@@ -129,10 +133,13 @@ def flightsummary(day,flight,y,file="flights_lookuptable.csv",ylims=[-100,300],a
         totaly.append(ydata)
         
         
+        
     #draw plot
     fig,ax = plt.subplots()
 
-    plt.title(title)
+    if title:
+        plt.title(titlestr)
+    
     ax.violinplot(dataset=totaly,showmeans=False,showmedians=False,showextrema=False)
     ax.boxplot(x=totaly,labels=labels,showmeans=True,showfliers=False)
     for i in range(len(totaly)):
@@ -140,8 +147,13 @@ def flightsummary(day,flight,y,file="flights_lookuptable.csv",ylims=[-100,300],a
         std = np.std(totaly[i],ddof=1)
         stdy = [mean+std,mean-std]
         ax.scatter(x=[i+1,i+1],y=stdy,color="tab:purple",marker="x")
-    ax.set_ylabel("% of background")
-    ax.set_ylim(ylims)
+    if absvals:
+        placeholder1,placeholder2,label2,ylabel2 = data["pops"][0].findplottype(y)
+        ax.set_ylabel(label2 + " in " + ylabel2)
+    else:
+        ax.set_ylabel("% of background")
+    if len(ylims) == 2:
+        ax.set_ylim(ylims)
 
     plt.show()
 

@@ -84,6 +84,8 @@
 1.9   Pops.heatmap(ax)
 
 	draws a dndlogdp-heatmap over time on an existing matplotlib-axis
+	
+	ax (axis) ... takes a matplotlib-axis, on which the graph will be drawn
 
 	startcrop (int, optional) ... Takes an int and crops the beginning of the plot by its amount seconds
 	endcrop (int, optional) ... Takes an int and crops the end of the plot by its amount seconds
@@ -366,7 +368,7 @@
 	
 6.    getdata.py
 
-6.1   getdata(day,height,loc,bgstart,pops,sen55,ccs811,file)
+6.1   getdata(day,height,loc,bgstart,pops,sen55,ccs811,file,absvals)
 
 	returns a dictionary containing lists of data-objects (Pops,SEN55,CCS811) of all flights that meet certain criteria (day,height,loc) which are specified on a lookuptable
 	
@@ -378,6 +380,7 @@
 	sen55 (bool) ... decides if the output-dict should have an entry "sen55" containing a list of SEN55-obj, default-False
 	ccs811 (bool) ... decides if the output-dict should have an entry "ccs811" containing a list of CCS811-obj, default-False
 	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default-"flights_lookuptable.csv" (see owncloud)
+	absvals (bool) ... takes a boolean to decide if data should be expressed as absolute values rather than relative to bg, default - False
 	
 6.2   flightvals(day,flight,file)
 
@@ -387,7 +390,7 @@
 	flight (int) ... decides which flight (assumes flights on each day are numbered 1-n) - for legal ints see lookuptable
 	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default-"flights_lookuptable.csv" (see owncloud)
 	
-6.3   flightsummary(day,flight,y,file,ylims,averaged)
+6.3   flightsummary(day,flight,y,file,ylims,averaged,absvals,title)
 
 	takes a day and a flightnumber and draws boxplots of the data y of every height and loc on the given flight
 	
@@ -397,6 +400,8 @@
 	file (str) ... takes a csv-file and uses it as a lookuptable for days, heights, locs and filenames of different flights, default - "flights_lookuptable.csv" (see owncloud)
 	ylims (list of int) ... takes a list of int with two entrys and uses them as ylims for the boxplot-graph, default - [-100,300]
 	averaged (bool) ... if True boxplots will be drawn from minutewise averaged data instead of raw data, default - False
+	absvals (bool) ... takes a boolean to decide if data should be expressed as absolute values rather than relative to bg, default - False
+	title (bool) ... if True plot will get the title "date flightno y", default - True
 	
 6.4   means(flightlist,y,outputfilename,file)
 
