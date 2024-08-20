@@ -31,7 +31,7 @@ class Pops:
         self.deviated = False
         self.d_categories = [element * 1000 for element in [0.115,0.125,0.135,0.150,0.165,0.185,0.210,0.250,0.350,0.475,0.575,0.855,1.220,1.53,1.99,2.585,3.37]]
         self.plottypes = [["temp_bm680","temperature (bm680)","°C"],["hum_bm680","rel. humidity (bm680)","%"],["temp_sen55","temperature (sen55)","°C"],["hum_sen55","rel. humidity (sen55)","%"],["druck","Luftdruck","hPa"],["gas","Gaswiderstand",r"$\Ohm$"],["pm1","PM1.0",r"$\mu$g/$m^3$"],["pm25","PM2.5",r"$\mu$g/$m^3$"],["pm4","PM4.0",r"$\mu$g/$m^3$"],["pm10","PM10.0",r"$\mu$g/$m^3$"],["voc","VOC-Index",""],["nox",r"$NO_X$-Index",""],["co2",r"$CO_2$","ppm"],["tvoc","TVOC","ppb"]]
-        self.plottypes2 = [["total","sum of all bins",r"Counts/$cm^3$"],["popstemp","temperature inside POPS-box","°C"],["boardtemp","boardtemp","°C"],["pops_pm25","PM2.5 from POPS",r"Counts/$cm^3$"],["pops_underpm25","particles smaller than 350 nm",r"Counts/$cm^3$"]]
+        self.plottypes2 = [["total","particle conc." , r"Counts/$cm^3$"],["popstemp","temperature inside POPS-box","°C"],["boardtemp","boardtemp","°C"],["pops_pm25","PM2.5 from POPS",r"Counts/$cm^3$"],["pops_underpm25","particles smaller than 350 nm",r"Counts/$cm^3$"]]
         
         #reads data from csv to list
         data = csv.reader(open(file),delimiter=",")
@@ -251,7 +251,7 @@ class Pops:
         im = ax.pcolormesh(xx,yy,heatmapdata,cmap="RdYlBu_r",norm=LogNorm(vmin=1,vmax=10000))
         ax.set_yscale("log")
         ax.set_ylabel("Durchmesser in $\mu$m")
-        #ax.set_xlabel("CET")
+        ax.set_xlabel("CET")
         ax.set_yticks(self.d_categories,labels=[str(self.d_categories[i]/1000) if len(str(self.d_categories[i]/1000)) == 5 else str(self.d_categories[i]/1000) + "0" for i in range(len(self.d_categories))])
         ax.axes.xaxis.set_visible(togglexticks)
         ax.yaxis.set_tick_params(which='minor', size=0)
@@ -259,7 +259,30 @@ class Pops:
         ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
         if togglecbar:
             plt.colorbar(im,label="dN/dlog$D_p$",orientation=orientation,location=location,pad=pad)
+            
+            
+    def newheatmap(self,ax,orientation="horizontal",location="top",pad=0):
         
+        heatmapdata = [[self.pops_bins[j][i] / (math.log10(self.d_categories[j+1])-math.log10(self.d_categories[j])) for i in range(len(self.pops_bins[0])-1)] for j in range(len(self.pops_bins))]
+        heatmapdata = self.replacezeros(heatmapdata)
+        
+        xlims = [self.popstime[0],self.popstime[-1]]
+        xlims = md.date2num(xlims)
+        
+        im = ax.imshow(heatmapdata,aspect="auto",cmap="RdYlBu_r",norm=LogNorm(vmin=1,vmax=10000),extent=[xlims[0],xlims[1],0,len(self.d_categories)-1],origin="lower",interpolation="none")
+        labels = [math.sqrt(self.d_categories[i]*self.d_categories[i+1]) for i in range(len(self.d_categories)-1)]
+        labels = [str(round(labels[i]/1000,2)) for i in range(len(labels))]
+        ticks = list(range(len(self.d_categories)-1))
+        ticks = [ticks[i]+0.5 for i in range(len(ticks))]
+        ax.set_yticks(ticks,labels=labels)
+        ax.xaxis.set_major_formatter(md.DateFormatter('%H:%M'))
+        
+        plt.colorbar(im,label="dN/dlog$D_p$",orientation=orientation,location=location,pad=pad)
+        
+        ax.yaxis.set_tick_params(which='minor', size=0)
+        ax.yaxis.set_tick_params(which='minor', width=0)
+        ax.set_xlabel("CET")
+        ax.set_ylabel("optical diameter $D_p$ in $\mu$m")
         
     def dndlogdp(self,ax):
         
@@ -438,7 +461,7 @@ class Pops:
                 self.ydata[j] = copy(newdata)
             else:
                 for i in range(len(self.ydata[j])):
-                    newdata.append((((self.ydata[j][i]+1) / (bgydata[j]+1))-1)*100)
+                    newdata.append((((self.ydata[j][i]) / (bgydata[j]+1))-1)*100)
                 self.ydata[j] = copy(newdata)
             
         for j in range(len(self.ydata2)):
@@ -449,7 +472,7 @@ class Pops:
                 self.ydata2[j] = copy(newdata)
             else:
                 for i in range(len(self.ydata2[j])):
-                    newdata.append((((self.ydata2[j][i]+1) / (bgydata2[j]+1))-1)*100)
+                    newdata.append((((self.ydata2[j][i]) / (bgydata2[j]+1))-1)*100)
                 self.ydata2[j] = copy(newdata)
             
         for j in range(len(self.pops_bins)):
@@ -460,7 +483,7 @@ class Pops:
                 self.pops_bins[j] = copy(newdata)
             else:
                 for i in range(len(self.pops_bins[j])):
-                    newdata.append((((self.pops_bins[j][i]+1) / (bgpops_bins[j])+1)-1)*100)
+                    newdata.append((((self.pops_bins[j][i]) / (bgpops_bins[j])+1)-1)*100)
                 self.pops_bins[j] = copy(newdata)
             
         self.relative = True

@@ -95,7 +95,7 @@ def flightvals(day,flight,file="flights_lookuptable.csv"):
         if element[3] == bgstart:
             val = element[2] + element[1]
             vals.append(val)
-    vals = list(set(vals))
+    #vals = list(set(vals))
     
     #outputs: [day,bgstart,loc,height]
     output = [[day,bgstart,"".join(element[i] for i in range(len(element)-2)),"".join(element[i] for i in range(len(element)-2,len(element)))] for element in vals]

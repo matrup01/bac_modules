@@ -93,6 +93,7 @@
 	orientation (str, optional) ... takes a str to change the orientation of the colorbar, default - "horizontal"
 	location (str, optional) ... takes a str to change the location of the colorbar relative to the plot, default-"top"
 	togglecbar (bool, optional) ... takes a bool to determine if the cbar should be drawn, default-True
+	pad (float, optional) ... takes a float and moves the cbar further away from the heatmap the higher the pad is, default-0
 	
 1.10  Pops.dndlogdp(ax)
 
@@ -173,6 +174,16 @@
 1.23  Pops.deviatefrommean()
 
 	changes all values to be expressed relative to the mean
+	
+1.24  Pops.newheatmap(ax)
+
+	creates a heatmap with consistant y-increments on an existing axis
+	
+	ax (axis) ... takes a matplotlib-axis, on which the graph will be drawn
+	
+	orientation (str, optional) ... takes a str to change the orientation of the colorbar, default - "horizontal"
+	location (str, optional) ... takes a str to change the location of the colorbar relative to the plot, default-"top"
+	pad (float, optional) ... takes a float and moves the cbar further away from the heatmap the higher the pad is, default-0
 
 
 2.    fluoreszenz.py
